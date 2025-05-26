@@ -17,6 +17,15 @@ implemented in oscmix.
 
 - RME Fireface UCX II
 
+### Devices in WIP State
+
+- RME Fireface UFX III
+- RME Fireface 802
+
+WebUI for WIP State preview is available at:
+https://huddx01.github.io/oscmix/
+
+
 ## Usage
 
 ```
