@@ -424,21 +424,6 @@ class Channel {
 	static OUTPUT = 'output';
 	static PLAYBACK = 'playback';
 
-//	static #inputNames = [
-//		'Mic/Line 1', 'Mic/Line 2', 'Inst/Line 3', 'Inst/Line 4',
-//		'Analog 5', 'Analog 6', 'Analog 7', 'Analog 8',
-//		'SPDIF L', 'SPDIF R', 'AES L', 'AES R',
-//		'ADAT 1', 'ADAT 2', 'ADAT 3', 'ADAT 4',
-//		'ADAT 5', 'ADAT 6', 'ADAT 7', 'ADAT 8',
-//	];
-//	static #outputNames = [
-//		'Analog 1', 'Analog 2', 'Analog 3', 'Analog 4',
-//		'Analog 5', 'Analog 6', 'Phones 7', 'Phones 8',
-//		'SPDIF L', 'SPDIF R', 'AES L', 'AES R',
-//		'ADAT 1', 'ADAT 2', 'ADAT 3', 'ADAT 4',
-//		'ADAT 5', 'ADAT 6', 'ADAT 7', 'ADAT 8',
-//	];
-
 	static #elements = new Set([
 		'mute',
 		'fx',
@@ -784,23 +769,31 @@ function setupInterface() {
 			midiPorts.output.disabled = true;
 			midiAccess.removeEventListener('statechange', midiStateChanged);
 			midiAccess = null;
-			currentDevice = null; // Gerät zurücksetzen
+			currentDevice = null;
 		}
 
 		if (event.target.value == 'MIDI') {
 			navigator.requestMIDIAccess({sysex: true}).then((access) => {
 				if (event.target.value != 'MIDI') return;
 
-				// Geräteerkennung bei Portänderung
-				const detectDevice = (portName) =>
-				devices.find(device => portName?.includes(device.deviceName));
+
+				const detectDevice = (portName) => {
+					return devices.find(device => {
+						if (!portName) return false;
+						// Check if the portName starts with the device name and contains any of the midiPortNames
+						return portName.startsWith(device.deviceName) &&
+						device.midiPortNames.some(port => portName.includes(port));
+					});
+				};
 
 				const updateCurrentDevice = () => {
 					const inputPort = access.inputs.get(midiPorts.input.value);
 					const outputPort = access.outputs.get(midiPorts.output.value);
 					currentDevice = detectDevice(inputPort?.name) || detectDevice(outputPort?.name);
-					if (currentDevice) console.log('Aktives Gerät:', currentDevice.deviceName);
-					// TODO: UI neu initialisieren
+					if (currentDevice) {
+						console.log('Active device:', currentDevice.deviceName);
+						reinitializeUI(); // Reinitialize the UI after updating the current device
+					}
 				};
 
 				for (const [select, ports] of [[midiPorts.input, access.inputs], [midiPorts.output, access.outputs]]) {
@@ -959,5 +952,43 @@ function setupInterface() {
 		node.addEventListener('blur', blur);
 	}
 }
+function reinitializeUI() {
+	// Clear existing UI elements
+	const inputsContainer = document.getElementById('inputs');
+	const outputsContainer = document.getElementById('outputs');
+	const playbacksContainer = document.getElementById('playbacks');
+	const mainOutSelect = document.getElementById('controlroom-mainout');
+	inputsContainer.innerHTML = '';
+	outputsContainer.innerHTML = '';
+	playbacksContainer.innerHTML = '';
+	mainOutSelect.innerHTML = ''; // Clear existing options
+
+	// Populate Main Out options as stereo pairs
+	for (let i = 0; i < currentDevice.outputNames.length; i += 2) {
+		if (i + 1 < currentDevice.outputNames.length) {
+			const left = currentDevice.outputNames[i];
+			const right = currentDevice.outputNames[i + 1].split(' ').pop(); // Extract content after the last space
+			const option = document.createElement('option');
+			option.textContent = `${left}/${right}`;
+			mainOutSelect.appendChild(option);
+		}
+	}
+
+	// Recreate channels based on the current device
+	for (const [type, container, names] of [
+		[Channel.INPUT, inputsContainer, currentDevice.inputNames],
+		[Channel.PLAYBACK, playbacksContainer, currentDevice.outputNames],
+		[Channel.OUTPUT, outputsContainer, currentDevice.outputNames],
+	]) {
+		let left;
+		for (let i = 0; i < names.length; ++i) {
+			const channel = new Channel(type, i, iface, left);
+			container.appendChild(channel.element);
+			left = i % 2 === 0 ? channel : null;
+		}
+	}
+	console.log('UI reinitialized for device:', currentDevice.deviceName);
+}
+
 
 document.addEventListener('DOMContentLoaded', setupInterface);

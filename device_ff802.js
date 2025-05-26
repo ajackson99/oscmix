@@ -1,6 +1,7 @@
 //device_ff802.js
 export const device_ff802 = {
 	deviceName: 'Fireface 802',
+	midiPortNames: ['Port 2'],
 	inputNames: [
 		'Analog 1', 'Analog 2', 'Analog 3', 'Analog 4',
 		'Analog 5', 'Analog 6', 'Analog 7', 'Analog 8',

@@ -1,6 +1,7 @@
 // device_ffucxii.js
 export const device_ffucxii = {
 	deviceName: 'Fireface UCX II',
+	midiPortNames: ['Port 2'],
 	inputNames: [
 		'Mic/Line 1', 'Mic/Line 2', 'Inst/Line 3', 'Inst/Line 4',
 		'Analog 5', 'Analog 6', 'Analog 7', 'Analog 8',
