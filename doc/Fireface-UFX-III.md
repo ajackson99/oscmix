@@ -246,33 +246,33 @@
 | 11A9     | AN 1 crossfeed             | 0=off, 1-5                                 |x                |
 | 11AA     | AN 1 ?                     |                                            |                 |
 | 11AB     | AN 1 volume cal.           | 1/100 fixed point, -24.00dB-3.00dB         |x                |
-| 11AC     | AN 1 low cut enabled       | 0=off 1=on                                 |x                |
-| 11AD     | AN 1 low cut freq          | 20Hz-500Hz                                 |x                |
-| 11AE     | AN 1 low cut slope         | 0=6dB/oct 1=12dB/oct 2=18dB/oct 3=24dB/oct |x                |
-| 11AF     | AN 1 eq enabled            | 0=off 1=on                                 |x                |
-| 11B0     | AN 1 eq band 1 type        | 0=Peak 1=Low Shelf 2=High Pass 3=Low Pass  |x                |
-| 11B1     | AN 1 eq band 1 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x                |
-| 11B2     | AN 1 eq band 1 freq        | 20Hz-20000Hz                               |x                |
-| 11B3     | AN 1 eq band 1 q           | 1/10 fixed point, 0.4-9.9                  |x                |
-| 11B4     | AN 1 eq band 2 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x                |
-| 11B5     | AN 1 eq band 2 freq        | 20Hz-20000Hz                               |x                |
-| 11B6     | AN 1 eq band 2 q           | 1/10 fixed point, 0.4-9.9                  |x                |
-| 11B7     | AN 1 eq band 3 type        | 0=Peak 1=High Shelf 2=Low Pass 3=High Pass |x                |
-| 11B8     | AN 1 eq band 3 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x                |
-| 11B9     | AN 1 eq band 3 freq        | 20Hz-20000Hz                               |x                |
-| 11BA     | AN 1 eq band 3 q           | 1/10 fixed point, 0.4-9.9                  |x                |
-| 11BB     | AN 1 dynamics enabled      | 0=off 1=on                                 |x                |
-| 11BC     | AN 1 dynamics gain         | 1/10 fixed point, -30.0dB-30.0dB           |x                |
-| 11BD     | AN 1 dynamics attack       | 0-200                                      |x                |
-| 11BE     | AN 1 dynamics release      | 100-999                                    |x                |
-| 11BF     | AN 1 dynamics comp. thres. | 1/10 fixed point, -60.0dB-0.0dB            |x                |
-| 11C0     | AN 1 dynamics comp. ratio  | 1/10 fixed point, 1.0-10.0                 |x                |
-| 11C1     | AN 1 dynamics exp. thres.  | 1/10 fixed point, -99.0dB--20.0dB          |x                |
-| 11C2     | AN 1 dynamics exp. ratio   | 1/10 fixed point, 1.0-10.0                 |x                |
-| 11C3     | AN 1 autolevel enabled     | 0=off 1=on                                 |x                |
-| 11C4     | AN 1 autolevel max gain    | 1/10 fixed point, 0.0dB-18.0dB             |x                |
-| 11C5     | AN 1 autolevel headroom    | 1/10 fixed point, 3.0dB-12.0dB             |x                |
-| 11C6     | AN 1 autolevel rise time   | 1/10 fixed point, 0.1-9.9                  |x                |
+| 11AD     | AN 1 low cut enabled       | 0=off 1=on                                 |x **(fixed)**    |
+| 11AE     | AN 1 low cut freq          | 20Hz-500Hz                                 |x **(fixed)**    |
+| 11AF     | AN 1 low cut slope         | 0=6dB/oct 1=12dB/oct 2=18dB/oct 3=24dB/oct |x **(fixed)**    |
+| 11B0     | AN 1 eq enabled            | 0=off 1=on                                 |x **(fixed)**    |
+| 11B1     | AN 1 eq band 1 type        | 0=Peak 1=Low Shelf 2=High Pass 3=Low Pass  |x **(fixed)**    |
+| 11B2     | AN 1 eq band 1 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x **(fixed)**    |
+| 11B3     | AN 1 eq band 1 freq        | 20Hz-20000Hz                               |x **(fixed)**    |
+| 11B4     | AN 1 eq band 1 q           | 1/10 fixed point, 0.4-9.9                  |x **(fixed)**    |
+| 11B5     | AN 1 eq band 2 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x **(fixed)**    |
+| 11B6     | AN 1 eq band 2 freq        | 20Hz-20000Hz                               |x **(fixed)**    |
+| 11B7     | AN 1 eq band 2 q           | 1/10 fixed point, 0.4-9.9                  |x **(fixed)**    |
+| 11B8     | AN 1 eq band 3 type        | 0=Peak 1=High Shelf 2=Low Pass 3=High Pass |x **(fixed)**    |
+| 11B9     | AN 1 eq band 3 gain        | 1/10 fixed point, -20.0dB-20.0dB           |x **(fixed)**    |
+| 11BA     | AN 1 eq band 3 freq        | 20Hz-20000Hz                               |x **(fixed)**    |
+| 11BB     | AN 1 eq band 3 q           | 1/10 fixed point, 0.4-9.9                  |x **(fixed)**    |
+| 11BC     | AN 1 dynamics enabled      | 0=off 1=on                                 |x **(fixed)**    |
+| 11BD     | AN 1 dynamics gain         | 1/10 fixed point, -30.0dB-30.0dB           |x **(fixed)**    |
+| 11BE     | AN 1 dynamics attack       | 0-200                                      |x **(fixed)**    |
+| 11BF     | AN 1 dynamics release      | 100-999                                    |x **(fixed)**    |
+| 11C0     | AN 1 dynamics comp. thres. | 1/10 fixed point, -60.0dB-0.0dB            |x **(fixed)**    |
+| 11C1     | AN 1 dynamics comp. ratio  | 1/10 fixed point, 1.0-10.0                 |x **(fixed)**    |
+| 11C2     | AN 1 dynamics exp. thres.  | 1/10 fixed point, -99.0dB--20.0dB          |x **(fixed)**    |
+| 11C3     | AN 1 dynamics exp. ratio   | 1/10 fixed point, 1.0-10.0                 |x **(fixed)**    |
+| 11C4     | AN 1 autolevel enabled     | 0=off 1=on                                 |x **(fixed)**    |
+| 11C5     | AN 1 autolevel max gain    | 1/10 fixed point, 0.0dB-18.0dB             |x **(fixed)**    |
+| 11C6     | AN 1 autolevel headroom    | 1/10 fixed point, 3.0dB-12.0dB             |x **(fixed)**    |
+| 11C7     | AN 1 autolevel rise time   | 1/10 fixed point, 0.1-9.9                  |x **(fixed)**    |
 | 11D0     | AN 2 volume                | 1/10 fixed point, -65.0-6.0                |x                |
 | ...      | ...                        | ...                                        |                 |
 | 1200     | AN 3                       |                                            |                 |
@@ -365,8 +365,8 @@
 | 2250     | MA 60                      |                                            |                 |
 | 2280     | MA 61                      |                                            |                 |
 | 22B0     | MA 62                      |                                            |                 |
-| 23E0     | MA 63                      |                                            |                 |
-| 2310     | MA 64                      |                                            |                 |
+| 22E0     | MA 63                      |                                            |x **(fixed)**    |
+| 2310     | MA 64                      |                                            |x **(fixed)**    |
 
 ### Playbacks
 
@@ -437,39 +437,60 @@
 
 | Register | Description                | Details                                    |
 | -------- | -------------------------- | ------------------------------------------ |
-| 30A0     | AN 1 delay                 | 1/100 fixed point, 0.00ms-42.50ms          |
-| 30A1     | AN 1 room EQ enable        | 0=off 1=on                                 |
-| 30A2     | AN 1 room EQ band 1 type   | 0=Bell 1=Low Shelf 2=High Pass 3=Low Pass  |
-| 30A3     | AN 1 room EQ band 1 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30A4     | AN 1 room EQ band 1 freq   | 20Hz-20000Hz                               |
-| 30A5     | AN 1 room EQ band 1 q      | 0.4-9.9                                    |
-| 30A6     | AN 1 room EQ band 2 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30A7     | AN 1 room EQ band 2 freq   | 20Hz-20000Hz                               |
-| 30A8     | AN 1 room EQ band 2 q      | 0.4-9.9                                    |
-| 30A9     | AN 1 room EQ band 3 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30AA     | AN 1 room EQ band 3 freq   | 20Hz-20000Hz                               |
-| 30AB     | AN 1 room EQ band 3 q      | 0.4-9.9                                    |
-| 30AC     | AN 1 room EQ band 4 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30AD     | AN 1 room EQ band 4 freq   | 20Hz-20000Hz                               |
-| 30AE     | AN 1 room EQ band 4 q      | 0.4-9.9                                    |
-| 30AF     | AN 1 room EQ band 5 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30B0     | AN 1 room EQ band 5 freq   | 20Hz-20000Hz                               |
-| 30B1     | AN 1 room EQ band 5 q      | 0.4-9.9                                    |
-| 30B2     | AN 1 room EQ band 6 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30B3     | AN 1 room EQ band 6 freq   | 20Hz-20000Hz                               |
-| 30B4     | AN 1 room EQ band 6 q      | 0.4-9.9                                    |
-| 30B5     | AN 1 room EQ band 7 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30B6     | AN 1 room EQ band 7 freq   | 20Hz-20000Hz                               |
-| 30B7     | AN 1 room EQ band 7 q      | 0.4-9.9                                    |
-| 30B8     | AN 1 room EQ band 8 type   | 0=Bell 1=High Shelf 2=Low Pass 3=High Pass |
-| 30B9     | AN 1 room EQ band 8 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30BA     | AN 1 room EQ band 8 freq   | 20Hz-20000Hz                               |
-| 30BB     | AN 1 room EQ band 8 q      | 0.4-9.9                                    |
-| 30BC     | AN 1 room EQ band 9 type   | 0=Bell 1=High Shelf 2=Low Pass 3=High Pass |
-| 30BD     | AN 1 room EQ band 9 gain   | 1/10 fixed point, -20.0dB-20.0dB           |
-| 30BE     | AN 1 room EQ band 9 freq   | 20Hz-20000Hz                               |
-| 30BF     | AN 1 room EQ band 9 q      | 0.4-9.9                                    |
-| 30C0     | AN 2 room EQ               |                                            |
+| 3426     | AN 1 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 3427     | AN 1 room EQ enable        | 0=off 1=on                                 |
+| 3428     | AN 1 room EQ band 1 type   | 0=Bell 1=Low Shelf 2=High Pass 3=Low Pass  |
+| 3429     | AN 1 room EQ band 1 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 342A     | AN 1 room EQ band 1 freq   | 20Hz–20000Hz                               |
+| 342B     | AN 1 room EQ band 1 q      | 0.4–9.9                                    |
+| 342C     | AN 1 room EQ band 2 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 342D     | AN 1 room EQ band 2 freq   | 20Hz–20000Hz                               |
+| 342E     | AN 1 room EQ band 2 q      | 0.4–9.9                                    |
+| 342F     | AN 1 room EQ band 3 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3430     | AN 1 room EQ band 3 freq   | 20Hz–20000Hz                               |
+| 3431     | AN 1 room EQ band 3 q      | 0.4–9.9                                    |
+| 3432     | AN 1 room EQ band 4 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3433     | AN 1 room EQ band 4 freq   | 20Hz–20000Hz                               |
+| 3434     | AN 1 room EQ band 4 q      | 0.4–9.9                                    |
+| 3435     | AN 1 room EQ band 5 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3436     | AN 1 room EQ band 5 freq   | 20Hz–20000Hz                               |
+| 3437     | AN 1 room EQ band 5 q      | 0.4–9.9                                    |
+| 3438     | AN 1 room EQ band 6 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3439     | AN 1 room EQ band 6 freq   | 20Hz–20000Hz                               |
+| 343A     | AN 1 room EQ band 6 q      | 0.4–9.9                                    |
+| 343B     | AN 1 room EQ band 7 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 343C     | AN 1 room EQ band 7 freq   | 20Hz–20000Hz                               |
+| 343D     | AN 1 room EQ band 7 q      | 0.4–9.9                                    |
+| 343E     | AN 1 room EQ band 8 type   | 0=Bell 1=High Shelf 2=Low Pass 3=High Pass |
+| 343F     | AN 1 room EQ band 8 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3440     | AN 1 room EQ band 8 freq   | 20Hz–20000Hz                               |
+| 3441     | AN 1 room EQ band 8 q      | 0.4–9.9                                    |
+| 3442     | AN 1 room EQ band 9 type   | 0=Bell 1=High Shelf 2=Low Pass 3=High Pass |
+| 3443     | AN 1 room EQ band 9 gain   | 1/10 fixed point, -20.0dB–20.0dB           |
+| 3444     | AN 1 room EQ band 9 freq   | 20Hz–20000Hz                               |
+| 3445     | AN 1 room EQ band 9 q      | 0.4–9.9                                    |
+|...	  | ...                        | ...                                        |
+| 3446     | AN 2 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 3447     | AN 2 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+| 3466     | AN 3 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 3467     | AN 3 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+| 3486     | AN 4 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 3487     | AN 4 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+| 34A6     | AN 5 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 34A7     | AN 5 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+| 34C6     | AN 6 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 34C7     | AN 6 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+| 34E6     | AN 7 delay                 | 1/100 fixed point, 0.00ms–42.50ms          |
+| 34E7     | AN 7 room EQ enable        | 0=off 1=on                                 |
+|...	  | ...                        | ...                                        |
+
+
+
 | 30E0     | AN 3 room EQ               |                                            |
 | 3100     | AN 4 room EQ               |                                            |
 | 3120     | AN 5 room EQ               |                                            |
@@ -567,41 +588,68 @@
 
 | Register | Description                | Details                                    |Notes (x=verified)|
 | -------- | -------------------------- | ------------------------------------------ |-----------------|
-| 3050     | main out                   | 0=off 1=AN 1/2 2=AN 3/4 ... 46=MA 63/64    |x                |
-| 3051     | mute mono                  | 0=off 1=on                                 |x                |
-| 3052     | mute enable                | 0=off 1=on                                 |x                |
-| 3053     | main out dim               | 1/10 fixed point, -65.0dB-0.0dB            |x                |
-| 3054     | dim                        | 0=off 1=on                                 |x                |
-| 3055     | recall volume              | 1/10 fixed point, -65.0dB-0.0dB            |x                |
+| 3050     | main out                   | 0=off 1=AN 1/2 2=AN 3/4 ... 46=MA 63/64    |x **(fixed)**    |
+| 3051     | mute mono                  | 0=off 1=on                                 |x **(fixed)**    |
+| 3052     | mute enable                | 0=off 1=on                                 |x **(fixed)**    |
+| 3053     | main out dim               | 1/10 fixed point, -65.0dB-0.0dB            |x **(fixed)**    |
+| 3054     | dim                        | 0=off 1=on                                 |x **(fixed)**    |
+| 3055     | recall volume              | 1/10 fixed point, -65.0dB-0.0dB            |x **(fixed)**    |
 
 ### Clock
 
 | Register | Description                | Details                                    |Notes (x=verified)|
 | -------- | -------------------------- | ------------------------------------------ |-----------------|
-| 3064     | clock source               | 0=Internal 1=Word Clock 2=AES 3=ADAT 1 4=ADAT 2 5=MADI O 6=MADI C |x                |
-| 3065     | sample rate                | 0=32000 1=44100 2=48000 3=64000 4=88200 5=96000 6=128000 7=176400 8=192000 |x                |
-| 3066     | word clock single speed    | 0=off 1=on                                 |x                |
-| 3067     | word clock term            | 0=off 1=on                                 |x                |
+| 3064     | clock source               | 0=Internal 1=Word Clock 2=AES 3=OPT 1 4=OPT 2 5=MADI O 6=MADI C |x **(fixed)**    |
+| 3065     | sample rate                | 0=32000 1=44100 2=48000 3=64000 4=88200 5=96000 6=128000 7=176400 8=192000 |x **(fixed)**    |
+| 3066     | word clock single speed    | 0=off 1=on                                 |x **(fixed)**    |
+| 3067     | word clock term            | 0=off 1=on                                 |x **(fixed)**    |
+
+### Clock - Available Sample Rates (on MacOS in CC-Mode)
+
+| Value | Sample Rate | 94ch      | 54ch      | 34ch      |
+|-------|-------------|-----------|-----------|-----------|
+| 0000  | 32000       | no        | no        | no        |
+| 0001  | 44100       | yes       | yes       | yes       |
+| 0002  | 48000       | yes       | yes       | yes       |
+| 0003  | 64000       | no        | no        | no        |
+| 0004  | 88200       | no        | yes       | yes       |
+| 0005  | 96000       | no        | yes       | yes       |
+| 0006  | 128000      | no        | no        | no        |
+| 0007  | 176400      | no        | no        | yes       |
+| 0008  | 192000      | no        | no        | yes       |
+
+Note: The Mixable 94/54/34 channel format (24 Bit Signed Integer) modes can be selected in AMS App individually for Inputs and Outputs.
 
 ### Hardware
 
 | Register | Description                | Details                                    |Notes (x=verified)|
 | -------- | -------------------------- | ------------------------------------------ |-----------------|
-| 3078     | AES input                  | 0=XLR 1=Optical 2                          |x                |
-| 307A     | AES channel status         | 0=Consumer 1=Professional                  |x                |
-| 307D?    | standalone MIDI            | 0=off 1=MIDI 1 2=MIDI 2                    |x                |
-| 307E?    | standalone ARC             | 0=volume 1=1s op 2=normal                  |x                |
-| 307F?    | LCD contrast               |                                            |x                |
-| 3087     | optical out 1              | 0=ADAT 1=SPDIF                             |x                |
-| 3088     | optical out 2              | 0=ADAT 1=SPDIF 2=AES                       |x                |
+| 3078     | AES input                  | 0=XLR 1=Optical 2                          |x **(fixed)**    |
+| 3079     | Optical Out 1              | 0=ADAT 1=SPDIF                             |x **(fixed)**    |
+| 307A     | Optical Out 2              | 0=ADAT 1=SPDIF 2=AES                       |x **(fixed)**    |
+| 307B     | AES channel status         | 0=Consumer 1=Professional                  |x **(fixed)**    |
+| 307C     | Interface Mode             | 0=Auto 1=USB2 2=USB3 3=CC                  |x **(fixed)**    |
+| 307D     | CC Routing                 | 0=All Ch. 1=Phones                         |x **(fixed)**    |
+| 307E     | Standalone MIDI            | 0=off 1=MIDI 1 2=MIDI 2 3=MADI O 4=MADI C  |x **(fixed)**    |
+| 307F     | Standalone ARC             | 0=volume 1=1s op 2=normal                  |x **(fixed)**    |
+| 3080     | Lock Keys                  | 0=off 1=Keys 2=All                         |x **(fixed)**    |
+| 3081     | Remap Keys                 | 0=off 1=on                                 |x **(fixed)**    |
+| 3082     | MIC / GAIN                 | 0=Default 1=Setup ... 0x0021=TotalMix      |x **(fixed)**    |
+| 3083     | REC / PLAY                 | 0=Default 1=Setup ... 0x0021=TotalMix      |x **(fixed)**    |
+| 3084     | CHAN / MIX                 | 0=Default 1=Setup ... 0x0021=TotalMix      |x **(fixed)**    |
+| 3085     | SETUP / R.                 | 0=Default 1=Setup ... 0x0021=TotalMix      |x **(fixed)**    |
+| 3086     | LCD Contrast               | FFEC=-20% ... FFFF=-1% 0=0% ... 0014=20%   |x **(fixed)**    |
+| 3087     | Test Results               | 0=? ... 5=MSD?                             |x **(fixed)**    |
+| 3088?    | SW Version?                | Change on Panel does not show any Reg/Val  |x **(fixed)**    |
+| ...     |                     |         |   |
 | 308C     | MADI input                 | 0=Optical 1=Coaxial 2=Auto 3=Split         |x                |
 | 308D     | MADI output                | 0=Optical 1=Mirror 2=Split                 |x                |
-| 308E     | MADI frames                | 0=96k 1=48k                                |x                |
-| 308F     | MADI format                | 0=64 channels 1=56 channels                |x                |
+| 308E     | MADI frames                | 0=96k 1=48k                                |x **(fixed)**    |
+| 308F     | MADI format                | 0=56 channels 1=64 channels                |x **(fixed)**    |
 | 3200     | DSP version/load           | [0:7]=DSP load [8:15]=DSP version          |x                |
 | 3201     | DSP function available     |                                            |x                |
 | 3202     | DSP function overload      | [8:15]=channel                             |x                |
-| 3203     | ARC encoder delta          |                                            |x                |
+| 3203?     | ARC encoder delta          |                                           |x                |
 | 3D43?    | standalone MIDI            |                                            |x                |
 | 3D44?    | CC-mode                    | 0=off 1=on                                 |x                |
 | 3D45?    | standalone ARC             |                                            |x                |
