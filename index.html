@@ -13,7 +13,9 @@
 					<form id="channel-name-form" class="channel-name-form">
 						<input id="channel-name" class="channel-name" readonly>
 					</form>
-					<input class="channel-pan" id="pan" type="range" min="-100" max="100" step="1" value="0">
+						<label id="pan">
+							<div class="knob-target"></div>
+						</label>
 					<div class="channel-mute">
 						<label class="toggle-button">M<input id="mute" type="checkbox"></label>
 						<label class="toggle-button">S<input id="solo" type="checkbox"></label>
@@ -44,9 +46,19 @@
 							<option>+19 dBu</option>
 							<option>+24 dBu</option>
 						</select></label>
-						<label data-flags="gain">Gain<input type="number" id="gain" min="0" max="24" step="0.5"></label>
+						<label data-flags="gain">Gain
+							<div class="knob-target"></div>
+						</label>
 						<label data-flags="autoset">Autoset<span><input type="checkbox" id="autoset"></span></label>
-						<label>FX<input type="number" id="fx" min="-65" max="0" step="0.5"></label>
+						<label>FX
+							<div class="fx-control">
+								<input type="range" class="fx-slider" orient="vertical" min="-65" max="0" step="0.5">
+								<input type="number" id="fx" min="-65" max="0" step="0.5">
+							</div>
+						</label>
+<!--						<label id="fx">-->
+<!--							<div class="knob-target"></div>-->
+<!--						</label>-->
 						<label data-type="output">Crossfeed<select id="crossfeed">
 							<option>Off</option>
 							<option>1</option>
@@ -154,10 +166,8 @@
 				<form id="connection">
 					<fieldset>
 						<label>Type<select id="connection-type">
-
 							<option id="connection-type-websocket">WebSocket</option>
 							<option id="connection-type-midi" selected>MIDI</option>
-
 						</select></label>
 						<label class="connection-midi">MIDI Input<select id="connection-midi-input" ></select></label>
 						<label class="connection-midi">MIDI Output<select id="connection-midi-output" ></select></label>
@@ -165,22 +175,22 @@
 					</fieldset>
 					<button id="connection-connect">Connect</button>
 					<button id="connection-disconnect">Disconnect</button>
+					<button id="connection-refresh">Refresh</button>
+					<button id="connection-reinitialise">Reinitialise</button>
 				</form>
 			</details>
 			<hr>
 			<details>
 				<summary>Debug<span id="debug"></span></summary>
-				<form id="connection">
+				<form id="debug">
 					<fieldset>
-						<button id="connection-refresh" type="button">Refresh</button>
-						<button id="connection-reinitialise" type="button">Reinitialise</button>
 						<label>Register:
 							<input id="debug-register" type="number" min="0">
 						</label>
 						<label>Value:
 							<input id="debug-value" type="number">
 						</label>
-						<button id="debug-set-register" type="button">Set Register</button>
+						<button id="debug-set-register">Set Register</button>
 					</fieldset>
 				</form>
 			</details>
@@ -378,7 +388,6 @@
 						<option>Keys</option>
 						<option>All</option>
 					</select></label>
-
 				</fieldset>
 			</details>
 		</div>
