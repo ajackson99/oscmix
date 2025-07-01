@@ -6,6 +6,20 @@ import { device_ffufxiii } from './device_ffufxiii.js';
 
 const devices = [device_ff802, device_ffucxii, device_ffufxiii];
 let currentDevice = device_ff802;
+updatePageTitle();
+
+/* Style Handling */
+const styleSelector = document.getElementById('ui-style-select');
+const styleLink = document.querySelector('link[rel="stylesheet"]');
+const savedStyle = localStorage.getItem('selectedStyle');
+if(savedStyle) {
+  styleLink.href = savedStyle;
+  styleSelector.value = savedStyle;
+}
+styleSelector.addEventListener('change', (e) => {
+  styleLink.href = e.target.value;
+  localStorage.setItem('selectedStyle', e.target.value);
+});
 
 /* OSC */
 class OSCDecoder {
@@ -176,7 +190,6 @@ class ConnectionMIDI extends AbortController {
 					instance.exports.handlesysex(sysex.byteOffset, sysex.byteLength, jsdata);
 				} catch (e) {
 					console.error('Error processing sysex:', e);
-					// Optional: Ignorieren oder spezifische Behandlung für 2305-Fehler
 					const unsupportedCodes = ['2304', '2305'];
 					if (
 						currentDevice.deviceName === 'Fireface 802' && unsupportedCodes.some(code => e.message.includes(code))
@@ -226,7 +239,6 @@ class Interface {
 			return `${hrs.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 		};
 
-		// Dateiliste binden
 		iface.methods.set('/durec/numfiles', (args) => {
 			this.durecFiles.length = args[0];
 			this.updateDurecFileList();
@@ -262,7 +274,6 @@ class Interface {
 			document.getElementById('durec-time').max = args[1];
 		});
 
-		// Steuerelemente
 		document.getElementById('durec-play').addEventListener('click', () => {
 			if (this.currentFile >= 0) {
 				iface.send('/durec/file', ',i', [this.currentFile]);
@@ -278,7 +289,6 @@ class Interface {
 		});
 
 		document.getElementById('durec-delete').addEventListener('click', () => {
-			// Delete benötigt einen Parameter!
 			iface.send('/durec/delete', ',i', [this.currentFile]);
 		});
 
@@ -295,7 +305,7 @@ class Interface {
 			document.getElementById('durec-time-display').textContent = formatTime(e.target.value);
 		});
 
-		iface.bind('/durec/time', ',i', // Komma hinzufügen
+		iface.bind('/durec/time', ',i',
 				   document.getElementById('durec-time'), 'value',
 				   'input'
 				   );
@@ -527,32 +537,24 @@ class EQPlot {
 
 class Knob {
 	constructor(options) {
-		this.id = options.id;
-		this.min = parseFloat(options.min);
-		this.max = parseFloat(options.max);
-		this.value = parseFloat(options.value) || this.min;
-		this.unit = options.unit || '';
-		this.size = options.size || 40;
-		this.step = options.step || 1;
-		this.resetValue = options.resetValue !== undefined ? options.resetValue : 0;
-		this.sendDuringDrag = options.sendDuringDrag || false;
-		this.sendInterval = options.sendInterval || 100;
-		this.lastSent = 0;
-		this.updateFromOSC = this.updateFromOSC.bind(this);
+		this._id = options.id;
+		this._min = parseFloat(options.min);
+		this._max = parseFloat(options.max);
+		this._step = parseFloat(options.step) || 1;
+		this._value = parseFloat(options.value) || this._min;
+		this._unit = options.unit || '';
+		this._size = options.size || 40;
+		this._resetValue = options.resetValue !== undefined ? options.resetValue : 0;
+		this._sendDuringDrag = options.sendDuringDrag || false;
+		this._sendInterval = options.sendInterval || 100;
+		this._lastSent = 0;
 
-		this.createKnob();
-		this.setupEventListeners();
-	}
-
-	createKnob() {
 		this.container = document.createElement('div');
 		this.container.className = 'knob-container';
-		this.container.id = `knob-${this.id}`;
+		this.container.id = `knob-${this._id}`;
 
 		this.knob = document.createElement('div');
 		this.knob.className = 'knob';
-		this.knob.style.width = `${this.size}px`;
-		this.knob.style.height = `${this.size}px`;
 
 		this.valueDisplay = document.createElement('div');
 		this.valueDisplay.className = 'knob-value';
@@ -561,6 +563,37 @@ class Knob {
 		this.container.appendChild(this.valueDisplay);
 
 		this.updateDisplay();
+		this.setupEventListeners();
+	}
+
+	get min() { return this._min; }
+	get max() { return this._max; }
+	get step() { return this._step; }
+	get value() { return this._value; }
+	get element() { return this.container; }
+	get type() { return 'number'; }
+	get valueAsNumber() { return this._value; }
+
+	set min(val) { this._min = parseFloat(val); }
+	set max(val) { this._max = parseFloat(val); }
+	set step(val) { this._step = parseFloat(val); }
+
+	set value(val) {
+		const rounded = Math.round(val / this._step) * this._step;
+		this._value = Math.max(this._min, Math.min(this._max, rounded));
+		this.updateDisplay();
+	}
+
+	set valueAsNumber(val) {
+		this.value = val;
+	}
+
+	updateDisplay() {
+		const angle = 45 + ((this._value - this._min) / (this._max - this._min)) * 270;
+		this.knob.style.transform = `rotate(${angle}deg)`;
+		this.knob.style.width = `${this._size}px`;
+		this.knob.style.height = `${this._size}px`;
+		this.valueDisplay.textContent = `${this._value.toFixed(1)}${this._unit ? ' ' + this._unit : ''}`;
 	}
 
 	setupEventListeners() {
@@ -568,6 +601,7 @@ class Knob {
 		this.startY = 0;
 		this.startValue = 0;
 		this.valueChanged = false;
+
 		this.knob.addEventListener('mousedown', this.handleMouseDown.bind(this));
 		document.addEventListener('mousemove', this.handleMouseMove.bind(this));
 		document.addEventListener('mouseup', this.handleMouseUp.bind(this));
@@ -580,14 +614,13 @@ class Knob {
 	handleMouseDown(e) {
 		this.isDragging = true;
 		this.startY = e.clientY;
-		this.startValue = this.value;
+		this.startValue = this._value;
 		this.valueChanged = false;
 		e.preventDefault();
 	}
 
 	handleMouseMove(e) {
 		if (!this.isDragging) return;
-
 		const deltaY = this.startY - e.clientY;
 		this.updateValueFromDrag(deltaY);
 	}
@@ -599,14 +632,13 @@ class Knob {
 	handleTouchStart(e) {
 		this.isDragging = true;
 		this.startY = e.touches[0].clientY;
-		this.startValue = this.value;
+		this.startValue = this._value;
 		this.valueChanged = false;
 		e.preventDefault();
 	}
 
 	handleTouchMove(e) {
 		if (!this.isDragging) return;
-
 		const deltaY = this.startY - e.touches[0].clientY;
 		this.updateValueFromDrag(deltaY);
 	}
@@ -616,26 +648,24 @@ class Knob {
 	}
 
 	handleDoubleClick() {
-		this.value = this.resetValue;
-		this.updateDisplay();
+		this.value = this._resetValue;
 		this.triggerUserChange();
 	}
 
 	updateValueFromDrag(deltaY) {
-		const stepFactor = 0.1 * this.step;
+		const stepFactor = 1 * this._step;
 		let newValue = this.startValue + (deltaY * stepFactor);
-		newValue = Math.round(newValue / this.step) * this.step;
-		newValue = Math.min(this.max, Math.max(this.min, newValue));
+		newValue = Math.round(newValue / this._step) * this._step;
+		newValue = Math.min(this._max, Math.max(this._min, newValue));
 
-		if (newValue !== this.value) {
+		if (newValue !== this._value) {
 			this.value = newValue;
-			this.updateDisplay();
 			this.valueChanged = true;
-			if (this.sendDuringDrag) {
+			if (this._sendDuringDrag) {
 				const now = Date.now();
-				if (now - this.lastSent > this.sendInterval) {
+				if (now - this._lastSent > this._sendInterval) {
 					this.triggerUserChange();
-					this.lastSent = now;
+					this._lastSent = now;
 				}
 			}
 		}
@@ -643,55 +673,47 @@ class Knob {
 
 	finalizeDrag() {
 		this.isDragging = false;
-		if (this.valueChanged && (!this.sendDuringDrag || this.value !== this.startValue)) {
+		if (this.valueChanged && (!this._sendDuringDrag || this._value !== this.startValue)) {
 			this.triggerUserChange();
 		}
 	}
 
-	updateDisplay() {
-		this.value = Math.max(this.min, Math.min(this.max, this.value));
-		const angle = 45 + ((this.value - this.min) / (this.max - this.min)) * 270;
-		this.knob.style.transform = `rotate(${angle}deg)`;
-		this.valueDisplay.textContent = `${this.value.toFixed(1)}${this.unit ? ' ' + this.unit : ''}`;
-	}
-
 	updateFromOSC(value) {
-		const roundedValue = Math.round(value / this.step) * this.step;
-		const clippedValue = Math.min(this.max, Math.max(this.min, roundedValue));
-		if (Math.abs(clippedValue - this.value) > 0.01) {
+		const roundedValue = Math.round(value / this._step) * this._step;
+		const clippedValue = Math.min(this._max, Math.max(this._min, roundedValue));
+		if (Math.abs(clippedValue - this._value) > 0.01) {
 			this.value = clippedValue;
-			this.updateDisplay();
 		}
 	}
 
 	triggerUserChange() {
 		const event = new CustomEvent('user-change', {
 			detail: {
-				value: this.value,
-				id: this.id
+				value: this._value,
+				id: this._id
 			}
 		});
 		this.container.dispatchEvent(event);
 	}
 
-	get element() {
-		return this.container;
+	triggerChangeEvent() {
+		this.container.dispatchEvent(new Event('change', { bubbles: true }));
 	}
 }
-// MARK: Channel class
+
 class Channel {
 	static INPUT = 'input';
 	static OUTPUT = 'output';
 	static PLAYBACK = 'playback';
 
 	static #elements = new Set([
-		'mute',
 		'fx',
 		'stereo',
 		'record',
 		'playchan',
 		'crossfeed',
 		'loopback',
+		'roomeq',
 		'msproc',
 		'phase',
 		'gain',
@@ -850,7 +872,6 @@ class Channel {
 			flags.push('playback');
 			defName = currentDevice.outputNames[index];
 			break;
-		// MARK: OUTPUT Channel 1
 		case Channel.OUTPUT:
 			flags.push('output')
 			defName = currentDevice.outputNames[index];
@@ -944,7 +965,6 @@ class Channel {
 			}
 
 		}
-		// MARK: Doubleclick Event Listeners
 		volumeRange.addEventListener('dblclick', (event) => {
 			const target = event.target;
 			if (target.valueAsNumber === 0) {
@@ -994,7 +1014,6 @@ class Channel {
 			iface.send(prefix + '/name', ',s', [name.value]);
 			return false;
 		});
-		// MARK: Level Meter
 		this.meter = fragment.getElementById('volume-meter');
 		this.meterValue = fragment.getElementById('volume-meter-value');
 		iface.methods.set(prefix + '/level', (args) => {
@@ -1002,12 +1021,12 @@ class Channel {
 			if (view.meterrms.checked) index += 1;
 			if (view.meterfx.checked && args.length >= 4) index += 2;
 			const value = Math.max(args[index], -65);
-			if (this.meter.value != value) {
-				this.meter.value = value;
-				this.meterValue.textContent = value == -Infinity ? 'UFL' : value.toFixed(1);
-			}
+			
+const percent = Math.min(100, Math.max(0, ((value + 65) / 71) * 100));
+this.meter.querySelector('.meter-fill').style.height = `${percent}%`;
+			
+this.meterValue.textContent = value == -Infinity ? 'UFL' : value.toFixed(1);
 		});
-		// MARK: Level Meter Stereo
 		if (left) {
 			stereo.addEventListener('change', (event) => {
 				if (event.target.checked) {
@@ -1057,7 +1076,7 @@ class Channel {
 				for (const prop of ['gain', 'freq', 'q']) {
 					const node = fragment.getElementById(`eq/band${i+1}${prop}`);
 					node.addEventListener('change', (event) => {
-						band[prop] = event.target.value;
+						band[prop] = event.target.valueAsNumber;
 						this.eq.update();
 					});
 				}
@@ -1079,22 +1098,57 @@ class Channel {
 			});
 		}
 
+
+		const muteCheckbox = fragment.querySelector('.mute-checkbox');
+		if (muteCheckbox) {
+			iface.bind(prefix + '/mute', ',i', muteCheckbox, 'checked', 'change');
+		}
+
+		const soloCheckbox = fragment.querySelector('.solo-checkbox');
+		if (soloCheckbox) {
+			iface.bind(prefix + '/solo', ',i', soloCheckbox, 'checked', 'change');
+		}
+
+		const muteEnable = document.getElementById('controlroom-muteenable');
+		muteEnable.addEventListener('change', () => {
+			document.body.classList.toggle('global-mute-enabled', muteEnable.checked);
+		});
+
+		const soloEnable = document.getElementById('main-soloenable');
+		soloEnable.addEventListener('change', () => {
+			document.body.classList.toggle('global-solo-enabled', soloEnable.checked);
+		});
+
+		
 		for (const node of fragment.querySelectorAll('[id]')) {
 			if (Channel.#elements.has(node.id)) {
 				const type = node.step && node.step < 1 ? ',f' : ',i';
 				let prop;
-				switch (node.constructor) {
-				case HTMLSelectElement:
-					prop = 'selectedIndex';
-					break;
-				case HTMLInputElement:
-					switch (node.type) {
-					case 'number': prop = 'valueAsNumber'; break;
-					case 'checkbox': prop = 'checked'; break;
+				let eventType = 'change';
+
+				if (node instanceof KnobElement) {
+					prop = 'valueAsNumber';
+				} else {
+					switch (node.constructor) {
+						case HTMLSelectElement:
+							prop = 'selectedIndex';
+							break;
+						case HTMLInputElement:
+							switch (node.type) {
+								case 'number':
+									prop = 'valueAsNumber';
+									break;
+								case 'checkbox':
+									prop = 'checked';
+									break;
+							}
+							break;
 					}
-					break;
 				}
-				iface.bind(prefix + '/' + node.id, type, node, prop, 'change');
+
+				if (prop) {
+					iface.bind(prefix + '/' + node.id, type, node, prop, eventType);
+				}
 			}
 			node.removeAttribute('id');
 		}
@@ -1104,7 +1158,14 @@ class Channel {
 
 
 
-// MARK: setupInterface
+function updatePageTitle() {
+	if (currentDevice) {
+		document.title = `oscmix - ${currentDevice.deviceName}`;
+	} else {
+		document.title = "oscmix - Generic";
+	}
+}
+
 
 const iface = new Interface();
 
@@ -1113,7 +1174,6 @@ function setupInterface() {
 
 	const connectionType = document.getElementById('connection-type');
 
-	// MARK: MIDI Connection Setup
 	const midiPorts = {
 		input: document.getElementById('connection-midi-input'),
 		output: document.getElementById('connection-midi-output'),
@@ -1152,7 +1212,6 @@ function setupInterface() {
 		}
 	}
 
-	// MARK: MIDI Connection Listener
 	let midiAccess;
 	connectionType.dataset.value = connectionType.value;
 	connectionType.addEventListener('change', (event) => {
@@ -1183,6 +1242,7 @@ function setupInterface() {
 					const inputPort = access.inputs.get(midiPorts.input.value);
 					const outputPort = access.outputs.get(midiPorts.output.value);
 					currentDevice = detectDevice(inputPort?.name) || detectDevice(outputPort?.name);
+					updatePageTitle();
 					if (currentDevice) {
 						console.log('Active device:', currentDevice.deviceName);
 						reinitializeUI();
@@ -1210,7 +1270,6 @@ function setupInterface() {
 		}
 	});
 
-	// MARK: Connection Type Listener
 	const icon = document.getElementById('connection-icon');
 	let connection;
 	const connectionForm = document.getElementById('connection');
@@ -1230,20 +1289,20 @@ function setupInterface() {
 		const elements = event.target.elements;
 		icon.textContent = elements['connection-type'].value;
 		switch (elements['connection-type'].value) {
-		case 'WebSocket':
-			connection = new ConnectionWebSocket(new WebSocket(elements['connection-websocket-address'].value));
-			break;
-		case 'MIDI':
-			const input = midiAccess.inputs.get(elements['connection-midi-input'].value);
-			if (!input)
-				throw new Error('no MIDI input');
-			const output = midiAccess.outputs.get(elements['connection-midi-output'].value);
-			if (!output)
-				throw new Error('no MIDI output');
-			connection = new ConnectionMIDI(input, output);
-			break;
-		default:
-			throw new Error('unknown connection type');
+			case 'WebSocket':
+				connection = new ConnectionWebSocket(new WebSocket(elements['connection-websocket-address'].value));
+				break;
+			case 'MIDI':
+				const input = midiAccess.inputs.get(elements['connection-midi-input'].value);
+				if (!input)
+					throw new Error('no MIDI input');
+				const output = midiAccess.outputs.get(elements['connection-midi-output'].value);
+				if (!output)
+					throw new Error('no MIDI output');
+				connection = new ConnectionMIDI(input, output);
+				break;
+			default:
+				throw new Error('unknown connection type');
 		}
 		connection.signal.addEventListener('abort', () => {
 			icon.dataset.state = 'failed';
@@ -1253,11 +1312,11 @@ function setupInterface() {
 			iface.connection = connection;
 			icon.textContent = elements['connection-type'].value;
 			icon.dataset.state = 'connected';
+			updatePageTitle();
 			iface.send('/refresh', ',', []);
 		}).catch(console.error);
 	});
 
-	// MARK: Make Channels
 	/* make channels */
 	for (const [type, id] of [[Channel.INPUT, 'inputs'], [Channel.PLAYBACK, 'playbacks'], [Channel.OUTPUT, 'outputs']]) {
 		const div = document.getElementById(id);
@@ -1274,7 +1333,6 @@ function setupInterface() {
 	document.forms.view.elements.submix.value = 0;
 	Channel.submixChanged();
 
-	// MARK: Interface Bindings in setupInterface
 	iface.bind('/reverb', ',i', document.getElementById('reverb-enabled'), 'checked', 'change');
 	const reverbType = document.getElementById('reverb-type');
 	const reverbRoomScale = document.getElementById('reverb-roomscale');
@@ -1305,7 +1363,6 @@ function setupInterface() {
 	iface.bind('/reverb/smooth', ',i', document.getElementById('reverb-smooth'), 'valueAsNumber', 'change');
 	iface.bind('/reverb/volume', ',f', document.getElementById('reverb-volume'), 'valueAsNumber', 'change');
 	iface.bind('/reverb/width', ',f', document.getElementById('reverb-width'), 'valueAsNumber', 'change');
-	// Echo
 	iface.bind('/echo', ',i', document.getElementById('echo-enabled'), 'checked', 'change');
 	iface.bind('/echo/type', ',i', document.getElementById('echo-type'), 'selectedIndex', 'change');
 	iface.bind('/echo/delay', ',f', document.getElementById('echo-delay'), 'valueAsNumber', 'change');
@@ -1313,23 +1370,21 @@ function setupInterface() {
 	iface.bind('/echo/hicut', ',i', document.getElementById('echo-highcut'), 'selectedIndex', 'change');
 	iface.bind('/echo/volume', ',f', document.getElementById('echo-volume'), 'valueAsNumber', 'change');
 	iface.bind('/echo/width', ',f', document.getElementById('echo-width'), 'valueAsNumber', 'change');
-	// Control Room
 	iface.bind('/controlroom/mainout', ',i', document.getElementById('controlroom-mainout'), 'selectedIndex', 'change');
 	iface.bind('/controlroom/mainmono', ',i', document.getElementById('controlroom-mainmono'), 'checked', 'change');
 	iface.bind('/controlroom/muteenable', ',i', document.getElementById('controlroom-muteenable'), 'checked', 'change');
 	iface.bind('/controlroom/dimreduction', ',f', document.getElementById('controlroom-dimreduction'), 'valueAsNumber', 'change');
 	iface.bind('/controlroom/dim', ',i', document.getElementById('controlroom-dim'), 'checked', 'change');
 	iface.bind('/controlroom/recallvolume', ',f', document.getElementById('controlroom-recallvolume'), 'valueAsNumber', 'change');
-	// Clock
 	iface.bind('/clock/source', ',i', document.getElementById('clock-source'), 'selectedIndex', 'change');
 	iface.bind('/clock/samplerate', ',i', document.getElementById('clock-samplerate'), 'textContent');
 	iface.bind('/clock/wckout', ',i', document.getElementById('clock-wckout'), 'checked', 'change');
 	iface.bind('/clock/wcksingle', ',i', document.getElementById('clock-wcksingle'), 'checked', 'change');
 	iface.bind('/clock/wckterm', ',i', document.getElementById('clock-wckterm'), 'checked', 'change');
-	// Hardware
 	iface.bind('/hardware/aesin', ',i', document.getElementById('hardware-aesin'), 'selectedIndex', 'change');
 	iface.bind('/hardware/opticalin', ',i', document.getElementById('hardware-opticalin'), 'selectedIndex', 'change');
 	iface.bind('/hardware/opticalout', ',i', document.getElementById('hardware-opticalout'), 'selectedIndex', 'change');
+	iface.bind('/hardware/opticalin2', ',i', document.getElementById('hardware-opticalin2'), 'selectedIndex', 'change');
 	iface.bind('/hardware/opticalout2', ',i', document.getElementById('hardware-opticalout2'), 'selectedIndex', 'change');
 	iface.bind('/hardware/spdifout', ',i', document.getElementById('hardware-spdifout'), 'selectedIndex', 'change');
 	iface.bind('/hardware/ccmix', ',i', document.getElementById('hardware-ccmix'), 'selectedIndex', 'change');
@@ -1340,6 +1395,23 @@ function setupInterface() {
 	iface.bind('/hardware/standalonearc', ',i', document.getElementById('hardware-standalonearc'), 'selectedIndex', 'change');
 	iface.bind('/hardware/lockkeys', ',i', document.getElementById('hardware-lockkeys'), 'selectedIndex', 'change');
 	iface.bind('/hardware/remapkeys', ',i', document.getElementById('hardware-remapkeys'), 'checked', 'change');
+
+
+	iface.bind('/hardware/lcdcontrast', ',i', document.getElementById('hardware-lcdcontrast'), 'value', 'input');
+
+	iface.bind('/hardware/madiinput', ',i', document.getElementById('hardware-madiinput'), 'selectedIndex', 'change');
+	iface.bind('/hardware/madioutput', ',i', document.getElementById('hardware-madioutput'), 'selectedIndex', 'change');
+	iface.bind('/hardware/madiframe', ',i', document.getElementById('hardware-madiframe'), 'selectedIndex', 'change');
+	iface.bind('/hardware/madiformat', ',i', document.getElementById('hardware-madiformat'), 'selectedIndex', 'change');
+	iface.bind('/hardware/eqdrecord', ',i', document.getElementById('hardware-eqdrecord'), 'checked', 'change');
+
+	iface.bind('/hardware/dspvers', ',i', document.getElementById('hardware-dspvers'), 'textContent');
+	iface.bind('/hardware/dspload', ',i', document.getElementById('hardware-dspload'), 'textContent');
+
+	iface.bind('/hardware/dspverload', ',i', document.getElementById('hardware-dspverload'), 'textContent');
+	iface.bind('/hardware/dspavail', ',i', document.getElementById('hardware-dspavail'), 'textContent');
+	iface.bind('/hardware/dspstatus', ',i', document.getElementById('hardware-dspstatus'), 'textContent');
+
 	iface.bind('/durec/file', 'i', document.getElementById('durec-file'), 'value', 'change');
 	iface.bind('/durec/record', ',i', document.getElementById('durec-record'), 'checked', 'change');
 	iface.bind('/durec/play', ',i', document.getElementById('durec-play'), 'checked', 'change');
@@ -1366,8 +1438,8 @@ function setupInterface() {
 	}
 	iface.initDurec();
 
-	document.getElementById('debug-set-register').addEventListener('click', () => {
-
+	document.getElementById('debug-set-register').addEventListener('click', (event) => {
+		event.preventDefault(); 
 
 		const regInput = document.getElementById('debug-register');
 		const valInput = document.getElementById('debug-value');
@@ -1390,7 +1462,6 @@ function setupInterface() {
 	});
 }
 
-// MARK: Reinitialize the UI when the current device changes
 function reinitializeUI() {
 	const inputsContainer = document.getElementById('inputs');
 	const outputsContainer = document.getElementById('outputs');
@@ -1427,7 +1498,6 @@ function reinitializeUI() {
 	console.log('UI reinitialized for device:', currentDevice.deviceName);
 }
 
-// MARK: Populate device-specific options
 function populateDeviceSpecificOptions() {
 	const standaloneMidiSelect = document.getElementById('hardware-standalonemidi');
 
@@ -1454,3 +1524,88 @@ document.addEventListener('DOMContentLoaded', () => {
 	iface.initDurec();
 	setTimeout(populateDeviceSpecificOptions, 100);
 });
+
+
+
+class KnobElement extends HTMLElement {
+	static observedAttributes = ['min', 'max', 'step', 'value', 'unit', 'size', 'position'];
+
+	constructor() {
+		super();
+		this.attachShadow({ mode: 'open' });
+
+		this.knob = new Knob({
+			min: parseFloat(this.getAttribute('min')) || 0,
+			max: parseFloat(this.getAttribute('max')) || 100,
+			step: parseFloat(this.getAttribute('step')) || 1,
+			value: parseFloat(this.getAttribute('value')) || 0,
+			unit: this.getAttribute('unit') || '',
+			size: parseInt(this.getAttribute('size')) || 40,
+			position: this.getAttribute('position') || 'bottom-right'
+		});
+
+		this._value = this.knob.value;
+
+		this.shadowRoot.appendChild(this.knob.element);
+
+		this.valueDisplay = document.createElement('div');
+		this.valueDisplay.className = `knob-value ${this.knob.position || 'bottom-right'}`;
+		this.shadowRoot.appendChild(this.valueDisplay);
+
+		this.knob.container.addEventListener('user-change', (e) => {
+			this._value = e.detail.value;
+			this.valueDisplay.textContent = `${this._value.toFixed(1)}${this.knob.unit ? ' ' + this.knob.unit : ''}`;
+			this.dispatchEvent(new Event('change', { bubbles: true }));
+		});
+
+		this.updateDisplay();
+	}
+
+	updateDisplay() {
+		const marker = this.shadowRoot.querySelector('.knob');
+		if (marker) {
+			const angle = 45 + ((this._value - this.knob.min) / (this.knob.max - this.knob.min)) * 270;
+			marker.style.transform = `rotate(${angle}deg)`;
+			this.valueDisplay.textContent = `${this._value.toFixed(1)}${this.knob.unit ? ' ' + this.knob.unit : ''}`;
+		}
+	}
+
+	get valueAsNumber() { return this._value; }
+	set valueAsNumber(value) {
+		if (this._value !== value) {
+			this._value = value;
+			this.knob.value = value;
+			this.updateDisplay();
+		}
+	}
+
+	attributeChangedCallback(name, oldValue, newValue) {
+		if (!this.knob) return;
+
+		switch (name) {
+			case 'min':
+				this.knob.min = parseFloat(newValue);
+				break;
+			case 'max':
+				this.knob.max = parseFloat(newValue);
+				break;
+			case 'step':
+				this.knob.step = parseFloat(newValue);
+				break;
+			case 'value':
+				const numValue = parseFloat(newValue);
+				if (this._value !== numValue) {
+					this._value = numValue;
+					this.knob.value = numValue;
+					this.updateDisplay();
+				}
+				break;
+			case 'position':
+				this.valueDisplay.className = `knob-value ${newValue}`;
+				break;
+		}
+	}
+}
+
+
+customElements.define('osc-knob', KnobElement);

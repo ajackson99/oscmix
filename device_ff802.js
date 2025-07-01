@@ -33,7 +33,7 @@ export const device_ff802 = {
 				flags.push('reflevel');
 			}
 		}
-		if (type === 'playback') flags.push('playback');
+		//if (type === 'playback') flags.push('playback');
 		if (type === 'output') {
 			if (index <= 7) flags.push('reflevel');
 		}
