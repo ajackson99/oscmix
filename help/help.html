@@ -3,7 +3,12 @@
 	<span class="close-button" id="close-help">&times;</span>
 	<h2>URL Parameters Documentation</h2>
 	
-	<p>You can control the initial setup of the mixer by adding parameters to the URL. The current base URL is:</p>
+	<h3>Currently supported devices:</h3>
+	<p>- Fireface UCX II (Use Port 2)</p>
+	<p>- Fireface 802 (Use Port 2)</p>
+	<p>- Fireface UFX III (Use Port R or Port 4)</p>
+	
+	<p>You can control the initial setup of the mixer by adding parameters to the URL. The base URL is:</p>
 	
 	<div class="current-url-container">
 		<code id="current-base-url"></code>
@@ -26,12 +31,12 @@
 			<tr>
 				<td><code>midi-input</code></td>
 				<td>Specify MIDI input device by name<br>(use quotes for names with spaces)</td>
-				<td><code>index.html?midi-input="Fireface 802 (1234) Port 1"</code></td>
+				<td><code>index.html?midi-input="Fireface 802 (12345678) Port 2"</code></td>
 			</tr>
 			<tr>
 				<td><code>midi-output</code></td>
 				<td>Specify MIDI output device by name<br>(use quotes for names with spaces)</td>
-				<td><code>index.html?midi-output="Virtual MIDI Port"</code></td>
+				<td><code>index.html?midi-output="Fireface 802 (12345678) Port 2"</code></td>
 			</tr>
 			<tr>
 				<td><code>auto-connect</code></td>
@@ -49,13 +54,16 @@
 	<h3>Advanced Usage Examples:</h3>
 	<ul>
 		<li>Full setup with auto-connect:<br>
-			<code class="dynamic-url" data-params="midi&amp;midi-input=&quot;My MIDI Device&quot;&amp;midi-output=&quot;Output Device&quot;&amp;auto-connect=true"></code>
+			<code class="dynamic-url" data-params="midi&amp;midi-input=&quot;Fireface 802 (12345678) Port 2&quot;&amp;midi-output=&quot;Fireface 802 (12345678) Port 2&quot;&amp;auto-connect=true"></code>
 		</li>
-		<li>MIDI mode with dark theme:<br>
+		<li>MIDI mode with TM dark theme:<br>
 			<code class="dynamic-url" data-params="midi&amp;theme=style_tm_dark.css"></code>
 		</li>
+				<li>MIDI mode with TM light theme:<br>
+			<code class="dynamic-url" data-params="midi&amp;theme=style_tm_light.css"></code>
+		</li>
 		<li>Specific input only:<br>
-			<code class="dynamic-url" data-params="midi-input=&quot;Fireface 802 (1234) Port 1&quot;"></code>
+			<code class="dynamic-url" data-params="midi&amp;midi-input=&quot;Fireface 802 (12345678) Port 2&quot;"></code>
 		</li>
 	</ul>
 	

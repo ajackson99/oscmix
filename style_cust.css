@@ -204,27 +204,24 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 
 .channel-volume input[type="range"]::-webkit-slider-thumb {
 	appearance: none;
-	width: 31px;
-	height: 42px;
-	background: url('images/FaderWhite2n.png') no-repeat;
-	background-size: 62px 275px;
-	background-position: -31px 0;
-	transform: scale(0.9);
-	transform-origin: center;
-	margin-left: -16px;
-
+	width: 18px;
+	height: 54px;
+	background: url('img/fader_silver.png') no-repeat;
+	background-size: 18px 54px;
+	background-position: 0 1px;
+	transform: translateY(3px);
+	margin-left: -18px;
 }
 
 .channel-volume input[type="range"]::-moz-range-thumb {
-	width: 31px;
-	height: 42px;
-	background: url('images/FaderWhite2n.png') no-repeat;
-	background-size: 62px 275px;
-	background-position: -31px 0;
-	transform: scale(0.9);
-	transform-origin: center;
+	width: 18px;
+	height: 54px;
+	background: url('img/fader_silver.png') no-repeat;
+	background-size: 18px 54px;
+	background-position: 0 1px;
+	transform: translateY(3px);
+	margin-left: -18px;
 	border: none;
-	margin-left: -16px;
 }
 
 input[type=range]:focus {
