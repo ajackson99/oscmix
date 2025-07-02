@@ -2,19 +2,12 @@
 <html lang="en">
 	<head>
 		<title>oscmix Generic</title>
-		<!--		<link rel="stylesheet" href="style.css"/>
-		<link rel="stylesheet" href="help/help.css"/>
-		<script type="module" src="oscmix.js"></script>
-		<script src="url_params.js"></script>
-		<script src="help/help.js"></script>-->
-
 
 		<link rel="preload" href="style_tm_dark.css" as="style">
 		<link rel="preload" href="help/help.css" as="style">
 		<link rel="stylesheet" href="style_tm_dark.css"/>
 		<link rel="stylesheet" href="help/help.css" media="print" onload="this.media='all'"/>
 
-				
 		<link rel="preload" href="oscmix.js" as="script">
 		<link rel="preload" href="url_params.js" as="script">
 		<link rel="preload" href="help/help.js" as="script">
@@ -93,7 +86,6 @@
 							<label>Phase<span><input type="checkbox" id="phase"></span></label>
 							<label data-type="output">Loopback<span><input type="checkbox" id="loopback"></span></label>
 <!--							<button id="roomeq-show" data-type="output" class="roomeq">Room EQ</button>-->
-
 						</fieldset>
 					</div>
 					<div class="channel-panel channel-panel-eq" data-type="input output">
@@ -206,11 +198,10 @@
 		</div>
 		<div id="sidebar">
 			<details open>
-				<summary>UI Settings
-				</summary>
+				<summary>UI Settings</summary>
 				<fieldset>
 				<label>Help:
-						<button class="help-button" id="url-help-button">Open</button>
+					<button class="help-button" id="url-help-button">Open</button>
 				</label>
 				</fieldset>
 				<form id="ui-settings">
@@ -240,10 +231,12 @@
 						<label class="connection-midi">MIDI Output<select id="connection-midi-output" ></select></label>
 						<label class="connection-websocket">Server<input id="connection-websocket-address" size="1" value="ws://localhost:8222" ></label>
 					</fieldset>
-					<button id="connection-connect">Connect</button>
-					<button id="connection-disconnect">Disconnect</button>
-					<button id="connection-refresh">Refresh</button>
-					<button id="connection-reinitialise">Reinitialise</button>
+					<fieldset>
+						<button id="connection-connect">Connect</button>
+						<button id="connection-disconnect">Disconnect</button>
+						<button id="connection-refresh">Refresh</button>
+						<button id="connection-reinitialise">Reinitialise</button>
+					</fieldset>
 				</form>
 			</details>
 			<hr />
@@ -483,9 +476,7 @@
 						<option>All</option>
 					</select></label>
 					<label>LCD Contrast
-	<!-- 					<input type="range" class="fx-slider" orient="vertical" min="-65" max="0" step="0.5" value="-65"> -->
-						<input type="range" id="hardware-lcdcontrast" orient="vertical" min="-20" max="20" step="1" value="0"> 
-<!-- 						<input type="number" id="hardware-lcdcontrast" min="-20" max="20" step="1" value="0"> -->
+						<input type="range" id="hardware-lcdcontrast" orient="vertical" min="-20" max="20" step="1" value="0">
 					</label>
 					<label>MADI Input
 						<select id="hardware-madiinput">
@@ -531,7 +522,17 @@
 			<option value="-18" label="-18 dB">
 			<option value="-42" label="-42 dB">
 		</datalist>
-		
+		<script>
+			// Performance-Optimierung: Kritische Funktionen zuerst
+			window.addEventListener('DOMContentLoaded', function() {
+				if (typeof configureFromUrl === 'function') {
+					configureFromUrl();
+				}
+				if (typeof initHelp !== 'undefined') {
+					initHelp();
+				}
+			});
+		</script>
 		<script type="module" src="oscmix.js" defer></script>
 		<script src="url_params.js" defer></script>
 		<script src="help/help.js" defer></script>	</body>

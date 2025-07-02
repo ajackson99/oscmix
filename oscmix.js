@@ -354,7 +354,7 @@ class Interface {
 				case 'f': args.push(decoder.getFloat()); break;
 				}
 			}
-			if (!addr.match(/\/level$/))
+			if (!addr.match(/\/level$/) && !addr.match(/\/autolevel\/meter$/) && !addr.match(/\/dynamics\/meter$/))
 				console.debug(addr, args);
 			const method = this.methods.get(addr);
 			if (method)
