@@ -2,8 +2,22 @@
 <html lang="en">
 	<head>
 		<title>oscmix Generic</title>
-		<link rel="stylesheet" href="style.css"/>
+		<!--		<link rel="stylesheet" href="style.css"/>
+		<link rel="stylesheet" href="help/help.css"/>
 		<script type="module" src="oscmix.js"></script>
+		<script src="url_params.js"></script>
+		<script src="help/help.js"></script>-->
+
+		<!-- CSS mit Preload -->
+		<link rel="preload" href="style.css" as="style">
+			<link rel="preload" href="help/help.css" as="style">
+				<link rel="stylesheet" href="style.css"/>
+				<link rel="stylesheet" href="help/help.css" media="print" onload="this.media='all'"/>
+
+				<!-- Preload für JavaScript -->
+				<link rel="preload" href="oscmix.js" as="script">
+					<link rel="preload" href="url_params.js" as="script">
+						<link rel="preload" href="help/help.js" as="script">
 	</head>
 	<body>
 		<template id="channel-template">
@@ -109,20 +123,38 @@
 									<option value="HIGH_PASS">High Pass</option>
 								</select>
 								<div>Gain</div>
+									<input id="eq/band1gain" type="number" min="-20" max="20" step="0.5">
+									<input id="eq/band2gain" type="number" min="-20" max="20" step="0.5">
+									<input id="eq/band3gain" type="number" min="-20" max="20" step="0.5">
+								<div>Freq.</div>
+										<input id="eq/band1freq" type="number" min="20" max="20000">
+										<input id="eq/band2freq" type="number" min="20" max="20000">
+										<input id="eq/band3freq" type="number" min="20" max="20000">
+								<div>Q</div>
+									<input id="eq/band1q" type="number" min="0.4" max="9.9" step="0.1">
+									<input id="eq/band2q" type="number" min="0.4" max="9.9" step="0.1">
+									<input id="eq/band3q" type="number" min="0.4" max="9.9" step="0.1">
+
+								<!--
 								<label data-flags="eq/band1gain">bg1
 									<div class="knob-target"></div>
 								</label>
-								<osc-knob id="eq/band1gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="25" position="bottom-right"></osc-knob>
-								<osc-knob id="eq/band2gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="25"  position="bottom-right"></osc-knob>
-								<osc-knob id="eq/band3gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="25" position="bottom-right"></osc-knob>
+
+
+								<osc-knob id="eq/band1gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40" position="bottom-right"></osc-knob>
+								<osc-knob id="eq/band2gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40"  position="bottom-right"></osc-knob>
+								<osc-knob id="eq/band3gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40" position="bottom-right"></osc-knob>
+
 								<div>Freq.</div>
-								<osc-knob id="eq/band1freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="25"></osc-knob>
-								<osc-knob id="eq/band2freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="25"></osc-knob>
-								<osc-knob id="eq/band3freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="25"></osc-knob>
+								<osc-knob id="eq/band1freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
+								<osc-knob id="eq/band2freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
+								<osc-knob id="eq/band3freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
 								<div>Q</div>
-								<osc-knob id="eq/band1q" min="0.4" max="9.9" step="0.1" value="1.0" size="25"></osc-knob>
-								<osc-knob id="eq/band2q" min="0.4" max="9.9" step="0.1" value="1.0" size="25"></osc-knob>
-								<osc-knob id="eq/band3q" min="0.4" max="9.9" step="0.1" value="1.0" size="25"></osc-knob>
+								<osc-knob id="eq/band1q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+								<osc-knob id="eq/band2q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+								<osc-knob id="eq/band3q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+
+								-->
 							</div>
 						</details>
 						<details open>
@@ -174,11 +206,16 @@
 		</div>
 		<div id="sidebar">
 			<details open>
-				<summary>UI Settings</summary>
+				<summary>UI Settings
+				</summary>
+				<fieldset>
+				<label>Help:
+						<button class="help-button" id="url-help-button">Open</button>
+				</label>
+				</fieldset>
 				<form id="ui-settings">
 					<fieldset>
-						<label
-							>Theme:
+						<label>Theme:
 							<select id="ui-style-select">
 								<option value="style.css">Minimal</option>
 								<option value="style_cust.css">Custom</option>
@@ -190,6 +227,7 @@
 				</form>
 			</details>
 			<hr />
+			<div id="help-container"></div>
 			<details open>
 				<summary>Connection<span id="connection-icon"></span></summary>
 				<form id="connection">
@@ -445,7 +483,9 @@
 						<option>All</option>
 					</select></label>
 					<label>LCD Contrast
-						<input type="number" id="hardware-lcdcontrast" min="-20" max="20" step="1" value="0">
+	<!-- 					<input type="range" class="fx-slider" orient="vertical" min="-65" max="0" step="0.5" value="-65"> -->
+						<input type="range" id="hardware-lcdcontrast" orient="vertical" min="-20" max="20" step="1" value="0"> 
+<!-- 						<input type="number" id="hardware-lcdcontrast" min="-20" max="20" step="1" value="0"> -->
 					</label>
 					<label>MADI Input
 						<select id="hardware-madiinput">
@@ -491,5 +531,8 @@
 			<option value="-18" label="-18 dB">
 			<option value="-42" label="-42 dB">
 		</datalist>
-	</body>
+		
+		<script type="module" src="oscmix.js" defer></script>
+		<script src="url_params.js" defer></script>
+		<script src="help/help.js" defer></script>	</body>
 </html>

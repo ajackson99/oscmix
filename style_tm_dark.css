@@ -626,8 +626,8 @@ osc-knob {
 	justify-content: center;
 	overflow: hidden;
 	border: 2px solid var(--fx-center-border);
-	width:25px;
-	height:25px;
+	width:40px;
+	height:40px;
 	min-width: 25px;
 	min-height: 25px;
 }

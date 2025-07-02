@@ -206,7 +206,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	appearance: none;
 	width: 31px;
 	height: 42px;
-	background: url('img/fader_silver.png') no-repeat;
+	background: url('images/FaderWhite2n.png') no-repeat;
 	background-size: 62px 275px;
 	background-position: -31px 0;
 	transform: scale(0.9);
@@ -218,7 +218,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 .channel-volume input[type="range"]::-moz-range-thumb {
 	width: 31px;
 	height: 42px;
-	background: url('img/fader_silver.png') no-repeat;
+	background: url('images/FaderWhite2n.png') no-repeat;
 	background-size: 62px 275px;
 	background-position: -31px 0;
 	transform: scale(0.9);
