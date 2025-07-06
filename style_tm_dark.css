@@ -1,4 +1,8 @@
 :root {
+
+	/* Dimensions */
+	--channel-width: 85px;
+
 	/* Base Colors */
 	--background-color: #1E2328;
 	--background-sidebar-color: #1E2328;
@@ -131,6 +135,28 @@ output {
 	color: var(--text-highlight-color);
 }
 
+/* Rec & Play Buttons */
+.toggle-button.record-button:has(> .record-checkbox:checked) {
+	background-color: red !important;
+	color: var(--text-highlight-color);
+}
+
+.toggle-button.play-button:has(> .play-checkbox:checked) {
+	background-color: green !important;
+	color: var(--text-highlight-color);
+}
+
+/* Setup Slots & Store Buttons */
+.toggle-button.slot-button:has(> .slot-checkbox:checked) {
+	background-color: var(--mute-color);
+	color: var(--text-highlight-color);
+}
+
+.toggle-button.store-button:has(> .store-checkbox:checked) {
+	background-color: red;
+	color: var(--text-highlight-color);
+}
+
 /* Highlight if Global Mute/Solo enabled */
 body.global-mute-enabled .toggle-button.mute-button:has(> .mute-checkbox:checked) {
 	background-color: var(--mute-highlight) !important;
@@ -253,7 +279,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 .channel {
 	display: flex;
 	flex-direction: column;
-	width: 85px;
+	width:  var(--channel-width);
 }
 
 .channel > * {
@@ -780,6 +806,30 @@ osc-knob::after {
 	background-color: var(--adhoc-highlight) !important;
 	box-shadow: 0 0 8px 2px var(--adhoc-highlight-shadow);
 	color: var(--text-highlight-color);
+}
+
+/* Slot-Button */
+.controlroom-button-group .toggle-button:has(#setup-slotenable) {
+	background-color: var(--mute-color) !important;
+}
+
+.controlroom-button-group .toggle-button:has(#setup-slotenable:checked) {
+	background-color: var(--mute-highlight) !important;
+	box-shadow: 0 0 8px 2px var(--mute-highlight-shadow);
+	color: var(--text-highlight-color);
+}
+
+/* Store-Button */
+.controlroom-button-group .toggle-button:has(#setup-storeenable) {
+	background-color: var(--mute-color) !important;
+}
+
+.controlroom-button-group .toggle-button:has(#setup-storeenable:checked) {
+	background-color: var(--mute-highlight) !important;
+	box-shadow: 0 0 8px 2px var(--mute-highlight-shadow);
+	color: var(--text-highlight-color);
+}
+
 
 .controlroom-button-group .toggle-button:hover {
 	filter: brightness(1.1);
@@ -788,3 +838,4 @@ osc-knob::after {
 .controlroom-button-group .toggle-button:active {
 	filter: brightness(0.95);
 }
+
