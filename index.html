@@ -59,14 +59,23 @@
 							<label data-flags="gain">Gain
 								<div class="knob-target"></div>
 							</label>
+							<!--							<label data-flags="eq/band1gain">bg1-->
+							<!--								<div class="knob-target"></div>-->
+							<!--							</label>-->
 							<label data-flags="autoset">Autoset<span><input type="checkbox" id="autoset"></span></label>
+<!---->
+<!--							<label data-flags="fx">FX-->
+<!--								<div class="knob-target"></div>-->
+<!--							</label>-->
 														<label>FX
 															<div class="fx-control">
 																<input type="range" class="fx-slider" orient="vertical" min="-65" max="0" step="0.5" value="-65">
 																<input type="number" id="fx" min="-65" max="0" step="0.5" value="-65">
 															</div>
 														</label>
-
+							<!--						<label id="fx">-->
+							<!--							<div class="knob-target"></div>-->
+							<!--						</label>-->
 							<label data-type="output">Crossfeed<select id="crossfeed">
 								<option>Off</option>
 								<option>1</option>
@@ -81,7 +90,11 @@
 							<label data-type="output" >Volume Cal.
 								<input id="volumecal" type="range" orient="vertical" min="-24" max="3" step="0.1" value="0">
 							</label>
-							<label data-type="output">Room EQ<span><input type="checkbox" id="roomeq"></span></label>
+							<label data-type="output">Room EQ
+								<span>
+								<input type="checkbox" id="roomeq">
+								</span>
+							</label>
 							<label data-type="output" >rEQ Delay
 								<input id="roomeq/delay" type="range" orient="vertical" min="0" max="4.25" step="0.1" value="0">
 							</label>
@@ -94,6 +107,11 @@
 							<label data-type="output" >rEQ b2 Gain
 								<input id="roomeq/band2gain" type="range"  orient="vertical" min="-20" max="20" step="0.1" value="0">
 							</label>
+							<!-- VOLUMECAL KNOB HIER
+							<label data-flags="volumecal">VolCal
+								<div class="knob-target"></div>
+							</label>-->
+							<!--							<button id="roomeq-show" data-type="output" class="roomeq">Room EQ</button>-->
 						</fieldset>
 					</div>
 					<div class="channel-panel channel-panel-eq" data-type="input output">
@@ -134,7 +152,22 @@
 														<input id="eq/band1q" type="number" min="0.4" max="9.9" step="0.1">
 															<input id="eq/band2q" type="number" min="0.4" max="9.9" step="0.1">
 																<input id="eq/band3q" type="number" min="0.4" max="9.9" step="0.1">
-
+																	<!--
+																	<label data-flags="eq/band1gain">bg1
+																	<div class="knob-target"></div>
+																	</label>
+																	<osc-knob id="eq/band1gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40" position="bottom-right"></osc-knob>
+																	<osc-knob id="eq/band2gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40"  position="bottom-right"></osc-knob>
+																	<osc-knob id="eq/band3gain" min="-20" max="20" step="0.5" value="0" unit="dB" size="40" position="bottom-right"></osc-knob>
+																	<div>Freq.</div>
+																	<osc-knob id="eq/band1freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
+																	<osc-knob id="eq/band2freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
+																	<osc-knob id="eq/band3freq" min="20" max="20000" step="1" value="1000" unit="Hz" size="40"></osc-knob>
+																	<div>Q</div>
+																	<osc-knob id="eq/band1q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+																	<osc-knob id="eq/band2q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+																	<osc-knob id="eq/band3q" min="0.4" max="9.9" step="0.1" value="1.0" size="40"></osc-knob>
+																	-->
 																</div>
 						</details>
 						<details open>
@@ -281,6 +314,18 @@
 				</form>
 			</details>
 			<hr>
+
+				<details open>
+					<summary>ARC USB</summary>
+					<fieldset>
+						<label title="ARC USB Control">ARC Control
+						<button id="open-arc-control">Open Panel</button>
+						</label>
+					</fieldset>
+				</details>
+
+		
+			<hr>
 			<details open>
 				<summary>Setups</summary>
 				<form id="setup">
@@ -306,9 +351,19 @@
 						</label>
 						</fieldset>
 					</div>
-					<div class="store-action">
-						<button type="button" id="store-button" class="toggle-button record-button">Store</button>
+
+					<div class="controlroom-button-group">
+						<label class="toggle-button" title="Store selected setup to Unit">
+							Store<input id="store-button" type="checkbox">
+						</label>
 					</div>
+
+					<!--
+					<div class="store-action">
+
+						<button type="button" id="store-button" class="toggle-button">Store</button>
+				</div>-->
+
 				</form>
 			</details>
 			<hr>
@@ -538,6 +593,10 @@
 					<option>All</option>
 				</select></label>
 				<label>Remap Keys<span><input id="hardware-remapkeys" type="checkbox"></span></label>
+				<!--					<label>Remap Keys<select id="hardware-remapkeys">-->
+				<!--						<option>Off</option>-->
+				<!--						<option>On</option>-->
+				<!--					</select></label>-->
 				<label>MIC / GAIN<select id="hardware-programkey01">
 					<option>Default</option> <option>Load Setup 1</option> <option>Load Setup 2</option> <option>Load Setup 3</option> <option>Load Setup 4</option> <option>Load Setup 5</option> <option>Load Setup 6</option>
 					<option>DIM</option> <option>Recall</option> <option>Mute Enable</option> <option>Main Mono</option> <option>Main Mute</option>

@@ -1,11 +1,21 @@
 'use strict';
+
 import { Knob } from './knob.js';
 import { device_ff802 } from './device_ff802.js';
 import { device_ffucxii } from './device_ffucxii.js';
 import { device_ffufxiii } from './device_ffufxiii.js';
+
 const devices = [device_ff802, device_ffucxii, device_ffufxiii];
 let currentDevice = device_ff802;
 updatePageTitle();
+
+// ARC Conn state
+let connectionStatus = {
+	connected: false,
+	oscActive: false,
+	deviceName: "Disconnected"
+};
+
 /* Style Handling */
 const styleSelector = document.getElementById('ui-style-select');
 const styleLink = document.querySelector('link[rel="stylesheet"]');
@@ -18,6 +28,7 @@ styleSelector.addEventListener('change', (e) => {
 	styleLink.href = e.target.value;
 	localStorage.setItem('selectedStyle', e.target.value);
 });
+
 /* OSC */
 class OSCDecoder {
 	constructor(buffer, offset = 0, length = buffer.byteLength) {
@@ -50,6 +61,7 @@ class OSCDecoder {
 		return view.getFloat32(0);
 	}
 }
+
 class OSCEncoder {
 	constructor() {
 		this.buffer = new ArrayBuffer(1024);
@@ -82,10 +94,12 @@ class OSCEncoder {
 		this.offset += 4;
 	}
 }
+
 const WASI = {
 	EBADF: 8,
 	ENOTSUP: 58,
 };
+
 class ConnectionWebSocket extends AbortController {
 	constructor(socket) {
 		super();
@@ -110,6 +124,7 @@ class ConnectionWebSocket extends AbortController {
 		}
 	}
 }
+
 class ConnectionMIDI extends AbortController {
 	static #module;
 	constructor(input, output) {
@@ -162,6 +177,7 @@ class ConnectionMIDI extends AbortController {
 			}
 			const jsdata = instance.exports.jsdata;
 			const jsdataLen = new Uint32Array(instance.exports.memory.buffer, instance.exports.jsdatalen, 4)[0];
+
 			instance.exports._initialize();
 			const name = new Uint8Array(instance.exports.memory.buffer, jsdata, jsdataLen);
 			const { read } = new TextEncoder().encodeInto(input.name + '\0', name);
@@ -215,17 +231,21 @@ class ConnectionMIDI extends AbortController {
 		};
 	}
 }
+
 class Interface {
 	constructor() {
 		this.methods = new Map();
 		this.durecFiles = [];
 		this.currentFile = -1;
+
 		for (let i = 0; i < currentDevice.outputNames.length; i++) {
 			this.methods.set(`/output/${i+1}/volumecal`, (args) => {
+				//
 				console.log(`VolumeCal for output ${i+1}: ${args[0]}`);
 			});
 		}
 	}
+
 	initDurec() {
 		const formatTime = (seconds) => {
 			const hrs = Math.floor(seconds / 3600);
@@ -233,10 +253,12 @@ class Interface {
 			const sec = seconds % 60;
 			return `${hrs.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 		};
+
 		iface.methods.set('/durec/numfiles', (args) => {
 			this.durecFiles.length = args[0];
 			this.updateDurecFileList();
 		});
+
 		iface.methods.set('/durec/name', (args) => {
 			this.durecFiles[args[0]] = {
 				...this.durecFiles[args[0]],
@@ -244,18 +266,21 @@ class Interface {
 			};
 			this.updateDurecFileList();
 		});
+
 		iface.methods.set('/durec/samplerate', (args) => {
 			this.durecFiles[args[0]] = {
 				...this.durecFiles[args[0]],
 				samplerate: args[1]
 			};
 		});
+
 		iface.methods.set('/durec/channels', (args) => {
 			this.durecFiles[args[0]] = {
 				...this.durecFiles[args[0]],
 				channels: args[1]
 			};
 		});
+
 		iface.methods.set('/durec/length', (args) => {
 			this.durecFiles[args[0]] = {
 				...this.durecFiles[args[0]],
@@ -263,6 +288,7 @@ class Interface {
 			};
 			document.getElementById('durec-time').max = args[1];
 		});
+
 		document.getElementById('durec-play').addEventListener('click', () => {
 			if (this.currentFile >= 0) {
 				iface.send('/durec/file', ',i', [this.currentFile]);
@@ -272,12 +298,15 @@ class Interface {
 		document.getElementById('durec-record').addEventListener('click', () => {
 			iface.send('/durec/record', ',i', [1]);
 		});
+
 		document.getElementById('durec-stop').addEventListener('click', () => {
 			iface.send('/durec/stop', ',i', [1]);
 		});
+
 		document.getElementById('durec-delete').addEventListener('click', () => {
 			iface.send('/durec/delete', ',i', [this.currentFile]);
 		});
+
 		document.getElementById('durec-file').addEventListener('change', (e) => {
 			this.currentFile = parseInt(e.target.value);
 			const file = this.durecFiles[this.currentFile];
@@ -286,17 +315,21 @@ class Interface {
 				document.getElementById('durec-channels').textContent = file.channels || '--';
 			}
 		});
+
 		document.getElementById('durec-time').addEventListener('input', (e) => {
 			document.getElementById('durec-time-display').textContent = formatTime(e.target.value);
 		});
+
 		iface.bind('/durec/time', ',i',
 				   document.getElementById('durec-time'), 'value',
 				   'input'
 				   );
 	}
+
 	updateDurecFileList() {
 		const select = document.getElementById('durec-file');
 		select.innerHTML = '<option value="-1">New Recording...</option>';
+
 		this.durecFiles.forEach((file, index) => {
 			const option = document.createElement('option');
 			option.value = index;
@@ -304,12 +337,14 @@ class Interface {
 			select.appendChild(option);
 		});
 	}
+
 	#connection;
 	set connection(conn) {
 		this.#connection = conn;
 		conn.recv = this.handleOSC.bind(this);
 		conn.signal.addEventListener('abort', () => this.#connection = null, {once: true});
 	}
+
 	handleOSC(buffer, offset, length) {
 		const decoder = new OSCDecoder(buffer, offset, length);
 		const addr = decoder.getString();
@@ -334,13 +369,19 @@ class Interface {
 					case 'f': args.push(decoder.getFloat()); break;
 				}
 			}
-			if (!addr.match(/\/level$/) && !addr.match(/\/autolevel\/meter$/) && !addr.match(/\/dynamics\/meter$/))
-				console.debug(addr, args);
+			///---------------
+			// DEBUG LOGGING
+			// -------------
+			//if (!addr.match(/\/level$/) && !addr.match(/\/autolevel\/meter$/) && !addr.match(/\/dynamics\/meter$/))
+			//	console.debug(addr, args);
+
+
 			const method = this.methods.get(addr);
 			if (method)
 				method(args);
 		}
 	}
+
 	send(addr, types, args) {
 		if (!this.#connection)
 			throw new Error('not connected');
@@ -360,8 +401,13 @@ class Interface {
 		}
 		this.#connection.send(encoder.data());
 	}
+
 	bind(addr, types, obj, prop, eventType) {
 		this.methods.set(addr, (args) => {
+
+			console.log(`OSC update for ${addr}:`, args);
+
+
 			const step = obj.step;
 			obj[prop] = step ? Math.round(args[0] / step) * step : args[0];
 			if (eventType)
@@ -375,18 +421,22 @@ class Interface {
 		}
 	}
 }
+
 class OSCEvent extends Event {}
 class SubmixEvent extends Event {}
+
 class EQBand {
 	static PEAK = 0;
 	static LOW_SHELF = 1;
 	static HIGH_SHELF = 2;
 	static LOW_PASS = 3;
 	static HIGH_PASS = 4;
+
 	#type = EQBand.PEAK;
 	#gain = 0;
 	#freq = 100;
 	#q = 1;
+
 	constructor() {
 		this.#updateCoeffs();
 	}
@@ -453,6 +503,7 @@ class EQBand {
 		return (this.a0 + this.a1 * f2 + this.a2 * f4) / (this.b0 + this.b1 * f2 + f4);
 	}
 }
+
 class LowCut {
 	static #k = [1, 0.655, 0.528, 0.457];
 	order = 1;
@@ -466,6 +517,7 @@ class LowCut {
 		return y;
 	}
 }
+
 class EQPlot {
 	#svg;
 	#grid;
@@ -506,10 +558,13 @@ class EQPlot {
 		this.#curve.setAttribute('points', points.join(' '));
 	}
 }
+
+
 class Channel {
 	static INPUT = 'input';
 	static OUTPUT = 'output';
 	static PLAYBACK = 'playback';
+
 	static #elements = new Set([
 		'fx',
 		'stereo',
@@ -585,6 +640,7 @@ class Channel {
 		'roomeq/band9q',
 		'volumecal',
 	]);
+
 	static submixChanged() {
 		event = new SubmixEvent('change');
 		const selects = document.querySelectorAll('select.channel-volume-output');
@@ -594,6 +650,7 @@ class Channel {
 			select.dispatchEvent(event);
 		}
 	}
+
 	constructor(type, index, iface, left) {
 		const template = document.getElementById('channel-template');
 		const fragment = template.content.cloneNode(true);
@@ -617,18 +674,26 @@ class Channel {
 				sendDuringDrag: true,
 				sendInterval: 150,
 				borderColor: '#000000ab',
-				valueColor: '#ffcc00'
+				valueColor: '#ffcc00'     // Gelb-orange Schrift
 			});
+
+			// Füge den Knob in den Container ein
 			gainTarget.innerHTML = '';
 			gainTarget.appendChild(gainKnob.element);
+
+			// Event-Handler für Benutzeränderungen
 			gainKnob.element.addEventListener('user-change', (event) => {
 				const value = event.detail.value;
 				iface.send(`/${type}/${index+1}/gain`, ',f', [value]);
 			});
+
+			// OSC-Update-Handler
 			iface.methods.set(`/${type}/${index+1}/gain`, (args) => {
 				gainKnob.updateFromOSC(args[0]);
 			});
 		}
+	
+
 		const panTarget = fragment.querySelector('label[id="pan"] .knob-target');
 		let panKnob;
 		if (panTarget) {
@@ -643,8 +708,8 @@ class Channel {
 				resetValue: 0,
 				sendDuringDrag: true,
 				sendInterval: 150,
-				borderColor: '#000000ab',
-				valueColor: 'orange'
+				borderColor: '#000000ab',    // Roter Rand
+				valueColor: 'orange'     // Gelb-orange Schrift
 			});
 			panTarget.innerHTML = '';
 			panTarget.appendChild(panKnob.element);
@@ -661,19 +726,91 @@ class Channel {
 				panKnob.updateFromOSC(args[0]);
 			});
 		}
+//		let fxKnob; // Deklaration außerhalb
+//
+//		const fxTarget = fragment.querySelector('label[data-flags="fx"] .knob-target');
+//		if (fxTarget) {
+//			fxKnob = new Knob({ // Zuweisung statt Neudeklaration
+//				id: `fx-${type}-${index}`,
+//				min: -65,
+//				max: 0,
+//				value: -65,
+//				unit: 'dB',
+//				size: 25,
+//				step: 0.5,
+//				resetValue: -65,
+//				sendDuringDrag: true,
+//				sendInterval: 150,
+//				borderColor: '#0000ff',
+//				valueColor: 'white'
+//			});
+//
+//			fxTarget.innerHTML = '';
+//			fxTarget.appendChild(fxKnob.element);
+//
+//			fxKnob.element.addEventListener('user-change', (event) => {
+//				const value = event.detail.value;
+//				iface.send(`/${type}/${index+1}/fx`, ',f', [value]);
+//			});
+//
+//			// OSC-Handler INSIDE the if-block setzen
+//			iface.methods.set(`/${type}/${index+1}/fx`, (args) => {
+//				fxKnob.updateFromOSC(args[0]);
+//			});
+//		}
+		// VolumeCal Knob für Outputs
+//		if (type === Channel.OUTPUT) {
+//			//console.error('VolumeCal target ');
+//			const volumeCalTarget = fragment.querySelector('[data-flags="volumecal"] .knob-target');
+//			let volumeCalKnob;
+//			if (volumeCalTarget) {
+//				volumeCalKnob = new Knob({
+//					id: `volumecal-${index}`,
+//					min: -12,
+//					max: 12,
+//					value: 0,
+//					unit: 'dB',
+//					size: 25,
+//					step: 0.5,
+//					resetValue: 0,
+//					sendDuringDrag: true,
+//					sendInterval: 150,
+//					borderColor: '#00ff00',  // Grüner Rahmen
+//					valueColor: '#00ffff'    // Cyan Text
+//				});
+//
+//				volumeCalTarget.innerHTML = '';
+//				volumeCalTarget.appendChild(volumeCalKnob.element);
+//
+//				volumeCalKnob.element.addEventListener('user-change', (event) => {
+//					const value = event.detail.value;
+//					iface.send(`/output/${index+1}/volumecal`, ',f', [value]);
+//				});
+//
+//				iface.methods.set(`/output/${index+1}/volumecal`, (args) => {
+//					volumeCalKnob.updateFromOSC(args[0]);
+//				});
+//			} else {
+//				console.error('VolumeCal target not found in template');
+//			}
+//		}
+
 		const fxInput = fragment.getElementById('fx');
 		const fxSlider = fragment.querySelector('.fx-slider');
 		if (fxInput && fxSlider) {
 			fxSlider.value = fxInput.value;
+
 			const sendFxValue = (value) => {
 				iface.send(`/${type}/${index+1}/fx`, ',f', [value]);
 			};
+
 			fxInput.addEventListener('change', (event) => {
 				if (fxSlider.value !== event.target.value) {
 					fxSlider.value = event.target.value;
 				}
 				sendFxValue(parseFloat(event.target.value));
 			});
+
 			fxSlider.addEventListener('input', (event) => {
 				const value = parseFloat(event.target.value);
 				if (fxInput.value !== value.toString()) {
@@ -681,6 +818,7 @@ class Channel {
 					sendFxValue(value);
 				}
 			});
+
 			[fxInput, fxSlider].forEach(element => {
 				element.addEventListener('dblclick', (event) => {
 					const target = event.target;
@@ -692,6 +830,7 @@ class Channel {
 				});
 			});
 		}
+
 		let defName;
 		const prefix = `/${type}/${index + 1}`;
 		const flags = currentDevice.getFlags(type, index);
@@ -707,6 +846,7 @@ class Channel {
 			case Channel.OUTPUT:
 				flags.push('output')
 				defName = currentDevice.outputNames[index];
+
 				const selects = document.querySelectorAll('select.channel-volume-output');
 				for (const select of selects) {
 					const option = new Option(defName);
@@ -720,6 +860,7 @@ class Channel {
 							option.disabled = event.target.checked;
 					});
 				}
+
 				const submix = fragment.getElementById('submix');
 				submix.value = index;
 				fragment.children[0].addEventListener('click', (event) => {
@@ -730,6 +871,7 @@ class Channel {
 						Channel.submixChanged();
 					}
 				});
+
 				volumeRange.oninput = volumeNumber.onchange = (event) => {
 					volumeRange.value = event.target.value;
 					volumeNumber.value = event.target.value;
@@ -741,8 +883,11 @@ class Channel {
 				});
 				break;
 		}
+
+
 		fragment.children[0].dataset.flags = flags.join(' ');
 		if (type != Channel.OUTPUT) {
+
 			this.outputSelect = fragment.getElementById('volume-output');
 			this.outputSelect.addEventListener('change', (event) => {
 				const outputIndex = event.target.selectedIndex;
@@ -750,11 +895,13 @@ class Channel {
 				if (panKnob) {
 					panKnob.updateFromOSC(this.pan[outputIndex]);
 				}
+
 				if (view.routingmode.value == 'submix' && !(event instanceof SubmixEvent)) {
 					view.submix.value = outputIndex;
 					Channel.submixChanged();
 				}
 			});
+
 			volumeRange.oninput = volumeNumber.onchange = (event) => {
 				volumeRange.value = volumeNumber.value = event.target.value;
 				this.volume[this.outputSelect.selectedIndex] = event.target.value;
@@ -768,22 +915,26 @@ class Channel {
 			for (let i = 0; i < currentDevice.outputNames.length; ++i) {
 				this.volume[i] = -65;
 				this.pan[i] = 0;
+
 				iface.methods.set(`/mix/${i+1}${prefix}`, (args) => {
 					const vol = Math.max(Math.round(args[0] / volumeNumber.step) * volumeNumber.step, -65);
 					const pan = args[1];
 					this.volume[i] = vol;
+
 					if (pan != null) {
 						this.pan[i] = pan;
 						if (this.outputSelect.selectedIndex == i && panKnob) {
 							panKnob.updateFromOSC(pan);
 						}
 					}
+
 					if (this.outputSelect.selectedIndex == i) {
 						volumeRange.value = vol;
 						volumeNumber.value = vol;
 					}
 				});
 			}
+
 		}
 		volumeRange.addEventListener('dblclick', (event) => {
 			const target = event.target;
@@ -805,10 +956,13 @@ class Channel {
 			volumeRange.value = target.value;
 			target.dispatchEvent(new Event('change'));
 		});
+
 		for (const node of fragment.querySelectorAll(`[data-type]:not([data-type~="${type}"])`))
 			node.remove();
+
 		this.volumeDiv = fragment.getElementById('channel-volume');
 		this.meterValueDiv = fragment.getElementById('channel-meter-value');
+
 		name.value = defName;
 		name.addEventListener('dblclick', (event) => {
 			name.readOnly = false;
@@ -838,8 +992,10 @@ class Channel {
 			if (view.meterrms.checked) index += 1;
 			if (view.meterfx.checked && args.length >= 4) index += 2;
 			const value = Math.max(args[index], -65);
+
 			const percent = Math.min(100, Math.max(0, ((value + 65) / 71) * 100));
 			this.meter.querySelector('.meter-fill').style.height = `${percent}%`;
+
 			this.meterValue.textContent = value == -Infinity ? 'UFL' : value.toFixed(1);
 		});
 		if (left) {
@@ -854,6 +1010,7 @@ class Channel {
 			});
 			fragment.children[0].classList.add('channel-right')
 		}
+
 		const onPanelButtonChanged = (event) => {
 			for (const label of event.target.parentNode.parentNode.children) {
 				const other = label.firstElementChild;
@@ -863,9 +1020,11 @@ class Channel {
 		};
 		for (const node of fragment.querySelectorAll('.channel-panel-buttons input[type="checkbox"]'))
 			node.onchange = onPanelButtonChanged;
+
 		const eqSvg = fragment.getElementById('eq-plot');
 		if (eqSvg) {
 			this.eq = new EQPlot(eqSvg);
+
 			const eqEnabled = fragment.getElementById('eq');
 			eqEnabled.addEventListener('change', (event) => {
 				for (let i = 0; i < 3; ++i)
@@ -893,6 +1052,7 @@ class Channel {
 					});
 				}
 			}
+
 			const lowCut = new LowCut();
 			this.eq.bands.push(lowCut);
 			fragment.getElementById('lowcut').addEventListener('change', (event) => {
@@ -908,30 +1068,49 @@ class Channel {
 				this.eq.update();
 			});
 		}
+
+
+		// In der Channel-Klasse, Mute-Checkbox anpassen:
 		const muteCheckbox = fragment.querySelector('.mute-checkbox');
 		if (muteCheckbox) {
+			// Bindet OSC-Adresse an die Checkbox
 			iface.bind(prefix + '/mute', ',i', muteCheckbox, 'checked', 'change');
+
+			// Visuelles Feedback für Mute-Status
+			muteCheckbox.addEventListener('change', (event) => {
+				const channelElement = event.target.closest('.channel');
+				if (channelElement) {
+					channelElement.classList.toggle('muted', event.target.checked);
+				}
+			});
 		}
+
 		const soloCheckbox = fragment.querySelector('.solo-checkbox');
 		if (soloCheckbox) {
 			iface.bind(prefix + '/solo', ',i', soloCheckbox, 'checked', 'change');
 		}
+
 		const muteEnable = document.getElementById('controlroom-muteenable');
 		muteEnable.addEventListener('change', () => {
 			document.body.classList.toggle('global-mute-enabled', muteEnable.checked);
 		});
+
 		const soloEnable = document.getElementById('main-soloenable');
 		soloEnable.addEventListener('change', () => {
 			document.body.classList.toggle('global-solo-enabled', soloEnable.checked);
 		});
+
 		const recordCheckbox = fragment.querySelector('.record-checkbox');
 		if (recordCheckbox) {
 			iface.bind(prefix + '/record', ',i', recordCheckbox, 'checked', 'change');
 		}
+
 		const playCheckbox = fragment.querySelector('.play-checkbox');
 		if (playCheckbox) {
 			iface.bind(prefix + '/play', ',i', playCheckbox, 'checked', 'change');
 		}
+
+
 		for (const node of fragment.querySelectorAll('[id]')) {
 			if (Channel.#elements.has(node.id)) {
 				const type = node.step && node.step < 1 ? ',f' : ',i';
@@ -944,7 +1123,7 @@ class Channel {
 					case HTMLInputElement:
 						switch (node.type) {
 							case 'number':
-							case 'range':
+							case 'range': // Füge range hinzu
 								prop = 'valueAsNumber';
 								break;
 							case 'checkbox':
@@ -953,6 +1132,8 @@ class Channel {
 						}
 						break;
 				}
+
+
 				if (prop) {
 					iface.bind(prefix + '/' + node.id, type, node, prop, eventType);
 				}
@@ -962,6 +1143,9 @@ class Channel {
 		this.element = fragment;
 	}
 }
+
+
+
 function updatePageTitle() {
 	if (currentDevice) {
 		document.title = `oscmix - ${currentDevice.deviceName}`;
@@ -969,9 +1153,45 @@ function updatePageTitle() {
 		document.title = "oscmix - Generic";
 	}
 }
+
+
+
+function updateConnectionStatus(connected, oscActive, deviceName) {
+	connectionStatus = {
+		connected,
+		oscActive,
+		deviceName: deviceName || connectionStatus.deviceName
+	};
+
+
+	if (arcControlWindow && !arcControlWindow.closed) {
+		arcControlWindow.postMessage({
+			type: 'CONNECTION_STATUS',
+			...connectionStatus
+		}, '*');
+	}
+}
+
+function handleStatusRequests() {
+	window.addEventListener('message', (event) => {
+		if (event.data.type === 'REQUEST_STATUS_UPDATE') {
+			if (arcControlWindow && !arcControlWindow.closed) {
+				arcControlWindow.postMessage({
+					type: 'CONNECTION_STATUS',
+					...connectionStatus
+				}, '*');
+			}
+		}
+	});
+}
+
 const iface = new Interface();
+
 function setupInterface() {
+
+
 	const connectionType = document.getElementById('connection-type');
+
 	const midiPorts = {
 		input: document.getElementById('connection-midi-input'),
 		output: document.getElementById('connection-midi-output'),
@@ -1009,6 +1229,7 @@ function setupInterface() {
 				break;
 		}
 	}
+
 	let midiAccess;
 	connectionType.dataset.value = connectionType.value;
 	connectionType.addEventListener('change', (event) => {
@@ -1022,9 +1243,11 @@ function setupInterface() {
 			midiAccess = null;
 			currentDevice = null;
 		}
+
 		if (event.target.value == 'MIDI') {
 			navigator.requestMIDIAccess({sysex: true}).then((access) => {
 				if (event.target.value != 'MIDI') return;
+
 				const detectDevice = (portName) => {
 					return devices.find(device => {
 						if (!portName) return false;
@@ -1032,6 +1255,7 @@ function setupInterface() {
 						device.midiPortNames.some(port => portName.includes(port));
 					});
 				};
+
 				const updateCurrentDevice = () => {
 					const inputPort = access.inputs.get(midiPorts.input.value);
 					const outputPort = access.outputs.get(midiPorts.output.value);
@@ -1040,8 +1264,14 @@ function setupInterface() {
 					if (currentDevice) {
 						console.log('Active device:', currentDevice.deviceName);
 						reinitializeUI();
+						updateConnectionStatus(
+											   false, // Noch nicht verbunden
+											   false,
+											   currentDevice.deviceName
+											   );
 					}
 				};
+
 				for (const [select, ports] of [[midiPorts.input, access.inputs], [midiPorts.output, access.outputs]]) {
 					let prev;
 					for (const port of ports.values()) {
@@ -1055,12 +1285,15 @@ function setupInterface() {
 					select.disabled = false;
 					select.addEventListener('change', updateCurrentDevice);
 				}
+
 				midiAccess = access;
 				midiAccess.addEventListener('statechange', midiStateChanged);
 				updateCurrentDevice();
+
 			});
 		}
 	});
+
 	const icon = document.getElementById('connection-icon');
 	let connection;
 	const connectionForm = document.getElementById('connection');
@@ -1069,12 +1302,16 @@ function setupInterface() {
 			connection.abort();
 			reinitializeUI();
 		}
+//		if (event.submitter.id == 'connection-refresh') {
+//			iface.send('/refresh', ',', []);
+//		}
 		event.preventDefault();
 		if (connection)
 			connection.abort();
 		delete icon.dataset.state;
 		if (event.submitter.id == 'connection-disconnect') {
 			icon.textContent = '';
+			updateConnectionStatus(false, false);
 			return;
 		}
 		const elements = event.target.elements;
@@ -1098,15 +1335,21 @@ function setupInterface() {
 		connection.signal.addEventListener('abort', () => {
 			icon.dataset.state = 'failed';
 			connection = null;
+
+			updateConnectionStatus(false, false);
+
 		}, {once: true});
+
 		connection.ready.then(() => {
 			iface.connection = connection;
 			icon.textContent = elements['connection-type'].value;
 			icon.dataset.state = 'connected';
 			updatePageTitle();
 			iface.send('/refresh', ',', []);
+			updateConnectionStatus(true, true, currentDevice.deviceName);
 		}).catch(console.error);
 	});
+
 	/* make channels */
 	for (const [type, id] of [[Channel.INPUT, 'inputs'], [Channel.PLAYBACK, 'playbacks'], [Channel.OUTPUT, 'outputs']]) {
 		const div = document.getElementById(id);
@@ -1117,10 +1360,12 @@ function setupInterface() {
 			left = i % 2 == 0 ? channel : null;
 		}
 	}
+
 	const routingMode = document.getElementById('routing-mode');
 	routingMode.addEventListener('change', Channel.submixChanged);
 	document.forms.view.elements.submix.value = 0;
 	Channel.submixChanged();
+
 	iface.bind('/reverb', ',i', document.getElementById('reverb-enabled'), 'checked', 'change');
 	const reverbType = document.getElementById('reverb-type');
 	const reverbRoomScale = document.getElementById('reverb-roomscale');
@@ -1188,20 +1433,26 @@ function setupInterface() {
 	iface.bind('/hardware/programkey03', ',i', document.getElementById('hardware-programkey03'), 'selectedIndex', 'change');
 	iface.bind('/hardware/programkey04', ',i', document.getElementById('hardware-programkey04'), 'selectedIndex', 'change');
 	iface.bind('/hardware/lcdcontrast', ',i', document.getElementById('hardware-lcdcontrast'), 'value', 'input');
+
 	iface.bind('/hardware/madiinput', ',i', document.getElementById('hardware-madiinput'), 'selectedIndex', 'change');
 	iface.bind('/hardware/madioutput', ',i', document.getElementById('hardware-madioutput'), 'selectedIndex', 'change');
 	iface.bind('/hardware/madiframe', ',i', document.getElementById('hardware-madiframe'), 'selectedIndex', 'change');
 	iface.bind('/hardware/madiformat', ',i', document.getElementById('hardware-madiformat'), 'selectedIndex', 'change');
 	iface.bind('/hardware/eqdrecord', ',i', document.getElementById('hardware-eqdrecord'), 'checked', 'change');
+
 	iface.bind('/hardware/dspvers', ',i', document.getElementById('hardware-dspvers'), 'textContent');
 	iface.bind('/hardware/dspload', ',i', document.getElementById('hardware-dspload'), 'textContent');
+
 	iface.bind('/hardware/dspverload', ',i', document.getElementById('hardware-dspverload'), 'textContent');
 	iface.bind('/hardware/dspavail', ',i', document.getElementById('hardware-dspavail'), 'textContent');
 	iface.bind('/hardware/dspstatus', ',i', document.getElementById('hardware-dspstatus'), 'textContent');
+
 	iface.bind('/durec/file', 'i', document.getElementById('durec-file'), 'value', 'change');
 	iface.bind('/durec/record', ',i', document.getElementById('durec-record'), 'checked', 'change');
 	iface.bind('/durec/play', ',i', document.getElementById('durec-play'), 'checked', 'change');
 	iface.bind('/durec/stop', ',i', document.getElementById('durec-stop'), 'checked', 'change');
+
+
 	/* allow scrolling on number and range inputs */
 	const wheel = (event) => {
 		event.preventDefault();
@@ -1221,6 +1472,7 @@ function setupInterface() {
 		node.addEventListener('blur', blur);
 	}
 	iface.initDurec();
+
 	document.getElementById('debug-set-register').addEventListener('click', (event) => {
 		event.preventDefault();
 		const regInput = document.getElementById('debug-register');
@@ -1236,10 +1488,11 @@ function setupInterface() {
 			iface.send('/refresh', ',', []);
 			console.log(`Registerbefehl gesendet: 0x${register.toString(16)} = 0x${value.toString(16)}`);
 		} catch (e) {
-			console.error("Fehler beim Senden des Registerbefehls:", e);
-			alert("Senden fehlgeschlagen: " + e.message);
+			console.error("Error while tried to send Reg/Val: ", e);
 		}
 	});
+
+	// Setup Store Logic
 	const storeButton = document.getElementById('store-button');
 	const setupSlots = document.querySelectorAll('.setup-slot');
 	setupSlots[0].checked = true;
@@ -1251,11 +1504,41 @@ function setupInterface() {
 			}
 		});
 	});
+
 	storeButton.addEventListener('click', () => {
 		iface.send('/setup/store', ',i', [selectedSlot]);
-		console.log(`[OSCMix] Setup gespeichert in Slot ${selectedSlot + 1}`);
+		console.log(`Setup has been stored. Slot: ${selectedSlot + 1}`);
 	});
+	// ARC LEDs
+	let arcControlWindow = null;
+	document.getElementById('open-arc-control').addEventListener('click', () => {
+		if (arcControlWindow && !arcControlWindow.closed) {
+			arcControlWindow.focus();
+		} else {
+			arcControlWindow = window.open('arc_control.html', 'ARC Control', 'width=800,height=600');
+
+			window.addEventListener('message', (event) => {
+				if (event.origin !== window.location.origin) return;
+
+				if (event.data.type === 'REQUEST_STATUS_UPDATE') {
+					if (arcControlWindow && !arcControlWindow.closed) {
+						arcControlWindow.postMessage({
+							type: 'CONNECTION_STATUS',
+							...connectionStatus
+						}, '*');
+					}
+				}
+				else if (event.data.type === 'OSC_COMMAND') {
+					console.log('Empfangener OSC-Befehl:', event.data);
+					iface.send(event.data.command, ',i', event.data.args);
+				}
+			});
+		}
+	});
+	handleStatusRequests();
+
 }
+
 function reinitializeUI() {
 	const inputsContainer = document.getElementById('inputs');
 	const outputsContainer = document.getElementById('outputs');
@@ -1274,6 +1557,7 @@ function reinitializeUI() {
 			mainOutSelect.appendChild(option);
 		}
 	}
+
 	for (const [type, container, names] of [
 		[Channel.INPUT, inputsContainer, currentDevice.inputNames],
 		[Channel.PLAYBACK, playbacksContainer, currentDevice.outputNames],
@@ -1287,13 +1571,17 @@ function reinitializeUI() {
 		}
 	}
 	populateDeviceSpecificOptions();
+
 	console.log('UI reinitialized for device:', currentDevice.deviceName);
 }
+
 function populateDeviceSpecificOptions() {
 	const standaloneMidiSelect = document.getElementById('hardware-standalonemidi');
+
 	if (standaloneMidiSelect && currentDevice.hardware_standalonemidi) {
 		standaloneMidiSelect.innerHTML = '';
 		const options = currentDevice.hardware_standalonemidi.names;
+
 		options.forEach((option, index) => {
 			const opt = document.createElement('option');
 			opt.textContent = option;
@@ -1307,6 +1595,7 @@ function populateDeviceSpecificOptions() {
 		}
 	}
 }
+
 document.addEventListener('DOMContentLoaded', () => {
 	setupInterface();
 	iface.initDurec();

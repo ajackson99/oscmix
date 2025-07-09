@@ -54,6 +54,7 @@ export const device_ffufxiii = {
 		//if (type === 'playback') flags.push('playback');
 		if (type === 'output') {
 			flags.push('volumecal');
+			flags.push('roomeq');
 			if (index <= 11) flags.push('reflevel');
 		}
 		return flags;

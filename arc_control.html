@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>ARC Control Panel</title>
+				<style>
+					* {
+						margin: 0;
+						padding: 0;
+						box-sizing: border-box;
+						font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+					}
+					body {
+						display: flex;
+						justify-content: center;
+						align-items: center;
+
+						background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+						padding: 8px;
+					}
+					.panel-container {
+						background-color: rgba(30, 30, 30, 0.9);
+						border-radius: 12px;
+						box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+						padding: 8px;
+						width: 100%;
+						max-width: 600px;
+						backdrop-filter: blur(8px);
+						border: 1px solid rgba(255, 165, 0, 0.2);
+					}
+					h1 {
+						text-align: center;
+						color: #ffaa00;
+						margin-bottom: 20px;
+						font-size: 1.6rem;
+						text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+						position: relative;
+						letter-spacing: 1px;
+					}
+					h1::after {
+						content: '';
+						display: block;
+						width: 110px;
+						height: 4px;
+						background: linear-gradient(to right, #ff7700, #ffaa00);
+						margin: 12px auto;
+						border-radius: 2px;
+					}
+					.led-controls {
+						display: flex;
+						flex-direction: column;
+						gap: 16px;
+						margin-bottom: 10px;
+					}
+					.led-row {
+						margin-top: 20px;
+						display: flex;
+						justify-content: center;
+						gap: 15px;
+					}
+					.led-row-last {
+						justify-content: center;
+					}
+					.led-btn {
+						flex: 0 0 calc(22% - 15px);
+						padding: 8px 8px;
+						border: none;
+						border-radius: 8px;
+						background: linear-gradient(to bottom, #333, #222);
+						color: #ddd;
+						font-size: 1.0rem;
+						font-weight: 400;
+						cursor: pointer;
+						transition: all 0.3s ease;
+						box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+						position: relative;
+						overflow: hidden;
+						text-align: center;
+						min-height: 40px;
+						display: flex;
+						flex-direction: column;
+						justify-content: center;
+						align-items: center;
+						border: 1px solid rgba(255, 165, 0, 0.2);
+					}
+					.led-btn::before {
+						content: '';
+						position: absolute;
+						top: 0;
+						left: 0;
+						right: 0;
+						height: 4px;
+						background: linear-gradient(to right, #ff7700, #ffaa00);
+						opacity: 0.3;
+						transition: opacity 0.3s;
+					}
+					.led-btn:hover {
+						transform: translateY(-3px);
+						box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+						background: linear-gradient(to bottom, #3a3a3a, #292929);
+					}
+					.led-btn:hover::before {
+						opacity: 1;
+					}
+					.led-btn.active {
+						background: linear-gradient(to bottom, #ff8c00, #ff5500);
+						color: #fff;
+						box-shadow: 0 0 20px rgba(255, 140, 0, 0.6);
+						text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+					}
+					.led-btn.active::before {
+						opacity: 1;
+						background: linear-gradient(to right, #ff5500, #ffaa00);
+					}
+					.led-index {
+						font-size: 0.85rem;
+						color: #aaa;
+						margin-top: 5px;
+						font-weight: normal;
+					}
+					.led-btn.active .led-index {
+						color: #fff;
+						text-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+					}
+					.status-bar {
+						background: rgba(40, 40, 40, 0.8);
+						border-radius: 8px;
+						padding: 15px;
+						margin-top: 20px;
+						color: #ffaa00;
+						display: flex;
+						justify-content: space-between;
+						align-items: center;
+						border: 1px solid rgba(255, 165, 0, 0.2);
+					}
+					.current-state {
+						font-size: 1.1rem;
+						font-weight: 600;
+					}
+					.hex-value {
+						font-family: 'Courier New', monospace;
+						font-size: 1.0rem;
+						color: #ffaa00;
+						font-weight: bold;
+						letter-spacing: 1px;
+					}
+					.device-info {
+						background: rgba(40, 40, 40, 0.8);
+						border-radius: 8px;
+						padding: 15px;
+						margin-top: 20px;
+						color: #ffaa00;
+						text-align: center;
+						border: 1px solid rgba(255, 165, 0, 0.2);
+					}
+					.device-name {
+						font-size: 1.0rem;
+						margin-bottom: 10px;
+						color: #ffaa00;
+						font-weight: 600;
+					}
+					.device-status {
+						display: flex;
+						justify-content: center;
+						gap: 20px;
+						font-size: 0.9rem;
+						color: #aaa;
+					}
+					.status-indicator {
+						display: flex;
+						align-items: center;
+						gap: 5px;
+					}
+					.status-dot {
+						width: 10px;
+						height: 10px;
+						border-radius: 50%;
+						background-color: #ff5500;
+						box-shadow: 0 0 5px rgba(255, 85, 0, 0.7);
+					}
+					.status-dot.connected {
+						background-color: #00ff00;
+						box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+					}
+					.instructions {
+						background: rgba(40, 40, 40, 0.8);
+						border-radius: 8px;
+						padding: 15px;
+						margin-top: 8px;
+						color: #ddd;
+						font-size: 0.6rem;
+						border: 1px solid rgba(255, 165, 0, 0.2);
+					}
+					.instructions h3 {
+						color: #ffaa00;
+						margin-bottom: 8px;
+						text-align: center;
+					}
+					.instructions p {
+						margin-bottom: 8px;
+						line-height: 1.4;
+					}
+					.refresh-btn {
+						background: linear-gradient(to bottom, #ff8c00, #ff5500);
+						color: #fff;
+						border: none;
+						border-radius: 5px;
+						padding: 10px 20px;
+						font-weight: bold;
+						cursor: pointer;
+						margin-top: 8px;
+						transition: all 0.3s;
+						display: block;
+						width: 100%;
+						text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+						box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+					}
+					.refresh-btn:hover {
+						transform: translateY(-2px);
+						box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+						background: linear-gradient(to bottom, #ff9900, #ff6600);
+					}
+					@media (max-width: 768px) {
+						.led-btn {
+							font-size: 0.7rem;
+							padding: 12px 8px;
+							min-height: 70px;
+						}
+						.led-index {
+							font-size: 0.8rem;
+						}
+						h1 {
+							font-size: 2rem;
+						}
+						.led-row {
+							flex-wrap: wrap;
+						}
+						.led-btn {
+							flex: 0 0 calc(50% - 15px);
+						}
+					}
+					@media (max-width: 480px) {
+						.led-btn {
+							min-height: 65px;
+							flex: 0 0 100%;
+						}
+						.panel-container {
+							padding: 20px;
+						}
+						.led-row {
+							gap: 10px;
+						}
+						h1 {
+							font-size: 1.0rem;
+						}
+					}
+				</style>
+	</head>
+	<body>
+		<div class="panel-container">
+			<h1>ARC USB</h1>
+
+			<div class="device-info">
+				<div class="device-name" id="device-name">Disconnected</div>
+				<div class="device-status">
+					<div class="status-indicator">
+						<div class="status-dot" id="connection-status-dot"></div>
+						<span id="connection-status-text">Disconnected</span>
+					</div>
+					<div class="status-indicator">
+						<div class="status-dot" id="osc-status-dot"></div>
+						<span id="osc-status-text">OSC Inactive</span>
+					</div>
+				</div>
+			</div>
+			<div class="instructions">
+				<button class="refresh-btn" id="refresh-status">Refresh ARC Connection</button>
+			</div>
+			<div class="led-controls">
+				<!-- Row 1 -->
+				<div class="led-row">
+					<button class="led-btn" data-led-index="0">
+						SNAP 1
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="1">
+						SNAP 2
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="2">
+						SNAP 3
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="3">
+						SNAP 4
+						<span class="led-index"></span>
+					</button>
+				</div>
+				<!-- Row 2 -->
+				<div class="led-row">
+					<button class="led-btn" data-led-index="4">
+						SNAP 5
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="5">
+						SNAP 6
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="6">
+						SNAP 7
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="7">
+						SNAP 8
+						<span class="led-index"></span>
+					</button>
+				</div>
+				<!-- Row 3 -->
+				<div class="led-row">
+					<button class="led-btn" data-led-index="8">
+						MONO
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="9">
+						VOL PH 1
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="10">
+						VOL PH 2
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="11">
+						EXT INP
+						<span class="led-index"></span>
+					</button>
+				</div>
+				<!-- Row 4 -->
+				<div class="led-row led-row-last">
+					<button class="led-btn" data-led-index="12">
+						TALKBACK
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="13">
+						SPEAKER B
+						<span class="led-index"></span>
+					</button>
+					<button class="led-btn" data-led-index="14">
+						DIM
+						<span class="led-index"></span>
+					</button>
+				</div>
+				<div class="led-row">
+					<button class="led-btn" data-led-index="15">
+						PEDAL
+						<span class="led-index"></span>
+					</button>
+				</div>
+			</div>
+
+
+			<div class="status-bar">
+				<div class="current-state">Current LED State:</div>
+				<div class="hex-value">0x0000</div>
+			</div>
+		</div>
+
+
+			<script>
+				let currentLedState = 0x0000;
+				function sendOSCCommand(value) {
+					if (window.opener) {
+						window.opener.postMessage({
+							type: 'OSC_COMMAND',
+							command: '/setup/arcleds',
+							args: [value]
+						}, '*');
+					}
+				}
+				function updateConnectionStatus(data) {
+					const connectionDot = document.getElementById('connection-status-dot');
+					const connectionText = document.getElementById('connection-status-text');
+					const oscDot = document.getElementById('osc-status-dot');
+					const oscText = document.getElementById('osc-status-text');
+					const deviceName = document.getElementById('device-name');
+					if (data.deviceName) {
+						deviceName.textContent = data.deviceName;
+					}
+					if (data.connected) {
+						connectionDot.classList.add('connected');
+						connectionText.textContent = 'Connected';
+					} else {
+						connectionDot.classList.remove('connected');
+						connectionText.textContent = 'Disconnected';
+					}
+					if (data.oscActive) {
+						oscDot.classList.add('connected');
+						oscText.textContent = 'OSC Active';
+					} else {
+						oscDot.classList.remove('connected');
+						oscText.textContent = 'OSC Inactive';
+					}
+				}
+				document.addEventListener('DOMContentLoaded', () => {
+					const ledButtons = document.querySelectorAll('.led-btn');
+					const hexValueDisplay = document.querySelector('.hex-value');
+					const refreshBtn = document.getElementById('refresh-status');
+					ledButtons.forEach(btn => {
+						const index = parseInt(btn.dataset.ledIndex);
+						btn.addEventListener('click', () => {
+							const bitMask = 1 << index;
+							currentLedState ^= bitMask;
+							btn.classList.toggle('active', (currentLedState & bitMask) !== 0);
+							const hexValue = currentLedState.toString(16).padStart(4, '0').toUpperCase();
+							hexValueDisplay.textContent = `0x${hexValue}`;
+							sendOSCCommand(currentLedState);
+							btn.style.transform = 'scale(0.95)';
+							setTimeout(() => {
+								btn.style.transform = '';
+							}, 200);
+						});
+					});
+					window.addEventListener('message', (event) => {
+						if (event.data.type === 'CONNECTION_STATUS') {
+							updateConnectionStatus(event.data);
+						}
+					});
+					refreshBtn.addEventListener('click', () => {
+						if (window.opener) {
+							window.opener.postMessage({ type: 'REQUEST_STATUS_UPDATE' }, '*');
+						}
+					});
+					if (window.opener) {
+						window.opener.postMessage({ type: 'REQUEST_INITIAL_DATA' }, '*');
+					}
+				});
+			</script>
+	</body>
+</html>
