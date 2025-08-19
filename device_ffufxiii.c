@@ -5,6 +5,7 @@
 
 #define LEN(a) (sizeof (a) / sizeof *(a))
 
+
 static const char *const reflevel_input[] = {"+13dBu", "+19dBu"};
 static const char *const reflevel_output[] = {"+4dBu", "+13dBu", "+19dBu"};
 static const char *const reflevel_output_xlr[] = {"+4dBu", "+13dBu", "+19dBu", "+24dBu"};
