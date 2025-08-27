@@ -40,8 +40,8 @@ export const device_ff802 = {
 		return flags;
 	},
 	hardware_standalonemidi: {
-		names: ["Off", "On"],
-		type: 'bool' // backwards compatibility
+		names: ["Off", "MIDI 1"],
+		type: 'enum'
 	}
 };
 

@@ -4,8 +4,9 @@ import { Knob } from './knob.js';
 import { device_ff802 } from './device_ff802.js';
 import { device_ffucxii } from './device_ffucxii.js';
 import { device_ffufxiii } from './device_ffufxiii.js';
+import { device_ffucx } from './device_ffucx.js';
 
-const devices = [device_ff802, device_ffucxii, device_ffufxiii];
+const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx];
 let currentDevice = device_ff802;
 updatePageTitle();
 
@@ -372,8 +373,13 @@ class Interface {
 			///---------------
 			// DEBUG LOGGING
 			// -------------
-			//if (!addr.match(/\/level$/) && !addr.match(/\/autolevel\/meter$/) && !addr.match(/\/dynamics\/meter$/))
-			//	console.debug(addr, args);
+			if (!addr.match(/\/level$/)
+				&& !addr.match(/\/autolevel\/meter$/)
+				&& !addr.match(/\/dynamics\/meter$/)
+				&& !addr.match(/\/hardware\/arcdelta$/)
+				&& !addr.match(/\/hardware\/arcbuttons$/)
+				)
+				console.debug(addr, args);
 
 
 			const method = this.methods.get(addr);
@@ -1424,7 +1430,7 @@ function setupInterface() {
 	iface.bind('/hardware/ccmode', ',i', document.getElementById('hardware-ccmode'), 'selectedIndex', 'change');
 	iface.bind('/hardware/interfacemode', ',i', document.getElementById('hardware-interfacemode'), 'selectedIndex', 'change');
 	iface.bind('/hardware/ccrouting', ',i', document.getElementById('hardware-ccrouting'), 'selectedIndex', 'change');
-	iface.bind('/hardware/standalonemidi', ',i', document.getElementById('hardware-standalonemidi'), 'checked', 'change');
+	iface.bind('/hardware/standalonemidi', ',i', document.getElementById('hardware-standalonemidi'), 'selectedIndex', 'change');
 	iface.bind('/hardware/standalonearc', ',i', document.getElementById('hardware-standalonearc'), 'selectedIndex', 'change');
 	iface.bind('/hardware/lockkeys', ',i', document.getElementById('hardware-lockkeys'), 'selectedIndex', 'change');
 	iface.bind('/hardware/remapkeys', ',i', document.getElementById('hardware-remapkeys'), 'checked', 'change');
