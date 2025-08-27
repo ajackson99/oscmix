@@ -139,6 +139,8 @@ setreg(unsigned reg, unsigned val)
 	val &= 0xffff;
 	if (dflag && reg != 0x3f00)
 		fprintf(stderr, "setreg %.4X %.4X\n", reg, val);
+if (reg != 0x3f00)
+		fprintf(stderr, "setreg verbose %.4X %.4X\n", reg, val);
 	regval = (reg & 0x7fff) << 16 | val;
 	par = regval >> 16 ^ regval;
 	par ^= par >> 8;
@@ -203,20 +205,20 @@ setenum(struct context *ctx, struct oscmsg *msg)
 	int val;
 
 	switch (*msg->type) {
-	case 's':
-		str = oscgetstr(msg);
-		if (str) {
-			for (val = 0; val < ctx->node->nameslen; ++val) {
-				if (strcasecmp(str, ctx->node->names[val]) == 0)
-					break;
+		case 's':
+			str = oscgetstr(msg);
+			if (str) {
+				for (val = 0; val < ctx->node->nameslen; ++val) {
+					if (strcasecmp(str, ctx->node->names[val]) == 0)
+						break;
+				}
+				if (val == ctx->node->nameslen)
+					return;
 			}
-			if (val == ctx->node->nameslen)
-				return;
-		}
-		break;
-	default:
-		val = oscgetint(msg);
-		break;
+			break;
+		default:
+			val = oscgetint(msg);
+			break;
 	}
 	if (oscend(msg) != 0)
 		return;
@@ -249,6 +251,9 @@ newbool(struct context *ctx, int val)
 		oscsend(ctx->addr, ",i", val != 0);
 }
 
+
+
+
 static void
 setmixlevel(const struct input *in, const struct output *out, float level)
 {
@@ -266,8 +271,16 @@ setmixlevel(const struct input *in, const struct output *out, float level)
 	assert(val <= 0x10000);
 	if (val > 0x4000)
 		val = (val >> 3) - 0x8000;
+
+	fprintf(stderr, "setmixlevel reg=0x%X  in=%d out=%d val=0x%lX (level=%.3f)\n",
+			reg, p.in, p.out, val, level);
+
 	setreg(reg, val);
 }
+
+
+
+
 
 static void
 setchannel(struct context *ctx, struct oscmsg *msg)
@@ -474,6 +487,7 @@ setoutputloopback(struct context *ctx, struct oscmsg *msg)
 	unsigned char buf[4], sysexbuf[7 + 5];
 
 	val = oscgetint(msg);
+	fprintf(stderr, "setoutputloopback: val = %d, param.in = %d\n", val, ctx->param.in);
 	if (oscend(msg) != 0)
 		return;
 	putle32(buf, val << 7 | ctx->param.in);
@@ -519,6 +533,13 @@ newdspstatus(struct context *ctx, int val)
 static void
 newarcdelta(struct context *ctx, int val)
 {
+	oscsend("/hardware/arcdelta", ",i", val );
+}
+
+static void
+newarcbuttons(struct context *ctx, int val)
+{
+	oscsend("/hardware/arcbuttons", ",i", val );
 }
 
 static void
@@ -535,6 +556,10 @@ setdb(const struct output *out, const struct input *in, float db)
 	val = (isinf(db) && db < 0 ? -650 : lroundf(db * 10.f)) & 0x7fff;
 	setreg(reg, val);
 }
+
+
+
+
 
 static void
 setpan(const struct output *out, const struct input *in, int pan)
@@ -809,6 +834,31 @@ newsamplerate(struct context *ctx, int val)
 }
 
 static void
+setregs(struct context *ctx, struct oscmsg *msg)
+{
+	int reg, val;
+
+	while (*msg->type) {
+		if (*msg->type != 'i') {
+			msg->err = "expected integer for register";
+			break;
+		}
+		reg = oscgetint(msg);
+		if (msg->err) break;
+
+		if (*msg->type != 'i') {
+			msg->err = "expected integer for value";
+			break;
+		}
+		val = oscgetint(msg);
+		if (msg->err) break;
+
+		setreg(reg, val);
+	}
+	oscend(msg);
+}
+
+static void
 newmeter(struct context *ctx, int val)
 {
 	const char *type, *name;
@@ -1075,6 +1125,28 @@ setdurecdelete(struct context *ctx, struct oscmsg *msg)
 }
 
 static void
+setsetupstore(struct context *ctx, struct oscmsg *msg)
+{
+	int val;
+
+	val = oscgetint(msg);
+	if (oscend(msg) != 0)
+		return;
+	if (val < 0 || val >= 6)
+		return;
+	setval(ctx, 0x0910 | val);
+}
+
+static void
+setsetuparcleds(struct context *ctx, struct oscmsg *msg)
+{
+	int val = oscgetint(msg);
+	if (oscend(msg) != 0) return;
+
+	setval(ctx, val);
+}
+
+static void
 setrefresh(struct context *ctx, struct oscmsg *msg)
 {
 	struct input *pb;
@@ -1179,6 +1251,18 @@ static const struct node roomeqtree[] = {
 	{0},
 };
 
+static const char *const programkey_names[] = {
+	"Default", "Load Setup 1", "Load Setup 2", "Load Setup 3", "Load Setup 4", "Load Setup 5", "Load Setup 6",
+	"DIM", "Recall", "Mute Enable", "Main Mono", "Main Mute",
+	"Main Out Low Cut", "Main Out EQ", "Main Out Dynamics", "Main Out AutoLevel",
+	"Phones 9/10 Mute", "Phones 9/10 Low Cut", "Phones 9/10 EQ", "Phones 9/10 Dynamics", "Phones 9/10 AutoLevel",
+	"Phones 11/12 Mute", "Phones 11/12 Low Cut", "Phones 11/12 EQ", "Phones 11/12 Dynamics", "Phones 11/12 AutoLevel",
+	"Reverb enable", "Echo enable",
+	"Durec Record", "Durec Play/Pause", "Durec Stop", "Durec Previous", "Durec Next",
+	"TotalMix",
+};
+#define PROGRAMKEY_NAMESLEN (sizeof(programkey_names)/sizeof(programkey_names[0]))
+
 static const struct node roottree[] = {
 	{"input", .set=setchannel, .new=newchannel, .tree=(const struct node[]){
 		{"mute", INPUT_MUTE, .set=setinputmute, .new=newinputmute},
@@ -1212,7 +1296,7 @@ static const struct node roottree[] = {
 		{"phase", OUTPUT_PHASE, .set=setbool, .new=newbool},
 		{"reflevel", OUTPUT_REFLEVEL, .set=setenum, .new=newenum, .names=(const char *const[]){
 			"+4dBu", "+13dBu", "+19dBu", "+24dBu",
-		}, .nameslen=4}, // TODO: phones
+		}, .nameslen=4},
 		{"crossfeed", OUTPUT_CROSSFEED, .set=setint, .new=newint},
 		{"volumecal", OUTPUT_VOLUMECAL, .set=setfixed, .new=newfixed, .min=-2400, .max=300, .scale=0.01},
 		{"lowcut", LOWCUT, .set=setbool, .new=newbool, .tree=lowcuttree},
@@ -1220,7 +1304,7 @@ static const struct node roottree[] = {
 		{"dynamics", DYNAMICS, .set=setbool, .new=newbool, .tree=dynamicstree},
 		{"autolevel", AUTOLEVEL, .set=setbool, .new=newbool, .tree=autoleveltree},
 		{"roomeq", ROOMEQ, .set=setbool, .new=newbool, .tree=roomeqtree},
-		{"loopback", .set=setoutputloopback},
+		{"loopback", .new=newbool, .set=setoutputloopback},
 		{0},
 	}},
 	{"playback", .set=setchannel, .tree=(const struct node[]){
@@ -1269,7 +1353,15 @@ static const struct node roottree[] = {
 		{"mainout", CTLROOM_MAINOUT, .set=setenum, .new=newenum, .names=(const char *const[]){
 			"1/2", "3/4", "5/6", "7/8", "9/10",
 			"11/12", "13/14", "15/16", "17/18", "19/20",
-		}, .nameslen=10},
+			"21/22", "23/24", "25/26", "27/28", "29/30",
+			"31/32", "33/34", "35/36", "37/38", "39/40",
+			"41/42", "43/44", "45/46", "47/48", "49/50",
+			"51/52", "53/54", "55/56", "57/58", "59/60",
+			"61/62", "63/64", "65/66", "67/68", "69/70",
+			"71/72", "73/74", "75/76", "77/78", "79/80",
+			"81/82", "83/84", "85/86", "87/88", "89/90",
+			"91/92", "93/94",
+		}, .nameslen=47},
 		{"mainmono", CTLROOM_MAINMONO, .set=setbool, .new=newbool},
 		{"muteenable", CTLROOM_MUTEENABLE, .set=setbool, .new=newbool},
 		{"dimreduction", CTLROOM_DIMREDUCTION, .set=setfixed, .new=newfixed, .scale=0.1, .min=-650, .max=0},
@@ -1285,6 +1377,17 @@ static const struct node roottree[] = {
 		{"wckout", CLOCK_WCKOUT, .set=setbool, .new=newbool},
 		{"wcksingle", CLOCK_WCKSINGLE, .set=setbool, .new=newbool},
 		{"wckterm", CLOCK_WCKTERM, .set=setbool, .new=newbool},
+		{0},
+	}},
+	{"setup", .tree=(const struct node[]){
+		{"store", SETUP_STORE, .set=setsetupstore, .new=NULL, .names=(const char *const[]){
+			"Slot 1", "Slot 2", "Slot 3", "Slot 4", "Slot 5", "Slot 6",
+		}, .nameslen=6},
+		{"arcleds", SETUP_ARCLEDS, .set=setsetuparcleds, .new=NULL, .names=(const char *const[]){
+			"LED 1", "LED 2", "LED 3", "LED 4", "LED 5", "LED 6", "LED 7", "LED 8",
+			"LED 9", "LED 10", "LED 11", "LED 12", "LED 13", "LED 14",
+			"LED 15",
+		}, .nameslen=15},
 		{0},
 	}},
 	{"hardware", .tree=(const struct node[]){
@@ -1326,11 +1429,29 @@ static const struct node roottree[] = {
 			"Off", "Keys", "All",
 		}, .nameslen=3},
 		{"remapkeys", HARDWARE_REMAPKEYS, .set=setbool, .new=newbool},
+		{"programkey01", HARDWARE_PROGRAMKEY01, .set=setenum, .new=newenum, .names=programkey_names, .nameslen=PROGRAMKEY_NAMESLEN},
+		{"programkey02", HARDWARE_PROGRAMKEY02, .set=setenum, .new=newenum, .names=programkey_names, .nameslen=PROGRAMKEY_NAMESLEN},
+		{"programkey03", HARDWARE_PROGRAMKEY03, .set=setenum, .new=newenum, .names=programkey_names, .nameslen=PROGRAMKEY_NAMESLEN},
+		{"programkey04", HARDWARE_PROGRAMKEY04, .set=setenum, .new=newenum, .names=programkey_names, .nameslen=PROGRAMKEY_NAMESLEN},
+		{"lcdcontrast", HARDWARE_LCDCONTRAST, .set=setint, .new=newint},
+		{"madiinput", HARDWARE_MADIINPUT, .set=setenum, .new=newenum, .names=(const char *const[]){
+			"Optical", "Coaxial", "Auto", "Split"
+		}, .nameslen=4},
+		{"madioutput", HARDWARE_MADIOUTPUT, .set=setenum, .new=newenum, .names=(const char *const[]){
+			"Optical", "Mirror", "Split"
+		}, .nameslen=3},
+		{"madiframe", HARDWARE_MADIFRAME, .set=setenum, .new=newenum, .names=(const char *const[]){
+			"96K Frame", "48K Frame"
+		}, .nameslen=2},
+		{"madiformat", HARDWARE_MADIFORMAT, .set=setenum, .new=newenum, .names=(const char *const[]){
+			"56 (28) ch", "64 (32 ch)"
+		}, .nameslen=2},
 		{"eqdrecord", .set=seteqdrecord},
 		{NULL, HARDWARE_DSPVERLOAD, .new=newdspload},
 		{NULL, HARDWARE_DSPAVAIL, .new=newdspavail},
 		{NULL, HARDWARE_DSPSTATUS, .new=newdspstatus},
 		{NULL, HARDWARE_ARCDELTA, .new=newarcdelta},
+		{NULL, HARDWARE_ARCBUTTONS, .new=newarcbuttons},
 		{0},
 	}},
 	{"durec", .tree=(const struct node[]){
@@ -1356,6 +1477,7 @@ static const struct node roottree[] = {
 		{NULL, DUREC_LENGTH, .new=newdureclength},
 		{0},
 	}},
+	{"register", -1, .set=setregs},
 	{"refresh", REFRESH, .set=setrefresh},
 	{0},
 };
@@ -1446,10 +1568,10 @@ oscsend(const char *addr, const char *type, ...)
 	va_start(ap, type);
 	for (; *type; ++type) {
 		switch (*type) {
-		case 'f': oscputfloat(&oscmsg, va_arg(ap, double)); break;
-		case 'i': oscputint(&oscmsg, va_arg(ap, int)); break;
-		case 's': oscputstr(&oscmsg, va_arg(ap, const char *)); break;
-		default: assert(0);
+			case 'f': oscputfloat(&oscmsg, va_arg(ap, double)); break;
+			case 'i': oscputint(&oscmsg, va_arg(ap, int)); break;
+			case 's': oscputstr(&oscmsg, va_arg(ap, const char *)); break;
+			default: assert(0);
 		}
 	}
 	va_end(ap);
@@ -1462,7 +1584,10 @@ oscsendenum(const char *addr, int val, const char *const names[], size_t namesle
 	if (val >= 0 && val < nameslen) {
 		oscsend(addr, ",is", val, names[val]);
 	} else {
+		fprintf(stderr, "unknown value for '%s': %d\n", addr, val);
+fprintf(stderr, "nameslen=%zu\n", nameslen);
 		fprintf(stderr, "unexpected enum value %d\n", val);
+		
 		oscsend(addr, ",i", val);
 	}
 }
@@ -1503,7 +1628,7 @@ handleregs(uint_least32_t *payload, size_t len)
 			continue;
 		assert(ctl < LEN(nodeindex));
 		assert(nodeindex[ctl][0] != 0xFF);
-
+		fprintf(stderr, "handleregs verbose %.4X %.4X\n", reg, val);
 		ctx.addrpos = addr;
 		tree = roottree;
 		for (idx = nodeindex[ctl], end = idx + sizeof nodeindex[ctl]; idx != end && *idx != 0xFF; ++idx) {
@@ -1545,12 +1670,12 @@ handlelevels(int subid, uint_least32_t *payload, size_t len)
 	peakfx = NULL;
 	rmsfx = NULL;
 	switch (subid) {
-	case 4: type = "input";  /* fallthrough */
-	case 1: peakfx = inputpeakfx, rmsfx = inputrmsfx; break;
-	case 5: type = "output";  /* fallthrough */
-	case 3: peakfx = outputpeakfx, rmsfx = outputrmsfx; break;
-	case 2: type = "playback"; break;
-	default: assert(0);
+		case 4: type = "input";  /* fallthrough */
+		case 1: peakfx = inputpeakfx, rmsfx = inputrmsfx; break;
+		case 5: type = "output";  /* fallthrough */
+		case 3: peakfx = outputpeakfx, rmsfx = outputrmsfx; break;
+		case 2: type = "playback"; break;
+		default: assert(0);
 	}
 	for (i = 0; i < len; ++i) {
 		rms = *payload++;
@@ -1594,16 +1719,16 @@ handlesysex(const unsigned char *buf, size_t len, uint_least32_t *payload)
 	for (i = 0; i < sysex.datalen; i += 5)
 		*pos++ = getle32_7bit(sysex.data + i);
 	switch (sysex.subid) {
-	case 0:
-		handleregs(payload, pos - payload);
-		fflush(stdout);
-		fflush(stderr);
-		break;
-	case 1: case 2: case 3: case 4: case 5:
-		handlelevels(sysex.subid, payload, pos - payload);
-		break;
-	default:
-		fprintf(stderr, "ignoring unknown sysex sub ID\n");
+		case 0:
+			handleregs(payload, pos - payload);
+			fflush(stdout);
+			fflush(stderr);
+			break;
+		case 1: case 2: case 3: case 4: case 5:
+			handlelevels(sysex.subid, payload, pos - payload);
+			break;
+		default:
+			fprintf(stderr, "ignoring unknown sysex sub ID\n");
 	}
 	oscflush();
 }
@@ -1647,8 +1772,9 @@ init(const char *port)
 	extern const struct device ffucxii;
 	extern const struct device ff802;
 	extern const struct device ffufxiii;
+	extern const struct device ffucx;
 	static const struct device *devices[] = {
-		&ffucxii, &ff802, &ffufxiii,
+		&ffucxii, &ff802, &ffufxiii, &ffucx,
 	};
 	int i;
 	size_t namelen;

@@ -6,8 +6,8 @@
 #define LEN(a) (sizeof(a) / sizeof(*(a)))
 
 static const char *const reflevel_input[] = {"+4dBu", "Lo Gain"};
-static const char *const reflevel_output[] = {"+4dBu", "+13dBu", "+19dBu"};
-static const char *const reflevel_phones[] = {"Low", "High"};
+static const char *const reflevel_output[] = {"-10dBV", "+4dBu", "Hi Gain"};
+
 
 static const struct channelinfo inputs[] = {
 	{"Analog 1",    INPUT_HAS_GAIN | INPUT_HAS_REFLEVEL,
@@ -56,10 +56,7 @@ static const struct channelinfo outputs[] = {
 	{"Analog 6",  OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_output, LEN(reflevel_output)}},
 	{"Analog 7",  OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_output, LEN(reflevel_output)}},
 	{"Analog 8",  OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_output, LEN(reflevel_output)}},
-	{"Phones 9",  OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_phones, LEN(reflevel_phones)}},
-	{"Phones 10", OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_phones, LEN(reflevel_phones)}},
-	{"Phones 11", OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_phones, LEN(reflevel_phones)}},
-	{"Phones 12", OUTPUT_HAS_REFLEVEL, .reflevel={reflevel_phones, LEN(reflevel_phones)}},
+	{"Phones 9"}, {"Phones 10"}, {"Phones 11"}, {"Phones 12"},
 	{"AES L"}, {"AES R"},
 	{"ADAT 1"}, {"ADAT 2"}, {"ADAT 3"}, {"ADAT 4"},
 	{"ADAT 5"}, {"ADAT 6"}, {"ADAT 7"}, {"ADAT 8"},
@@ -193,6 +190,7 @@ static enum control regtoctl(int reg, struct param *p) {
 		case 0x3D40: return HARDWARE_OPTICALIN2;
 		case 0x3D41: return HARDWARE_OPTICALOUT2;
 		case 0x3D42: return HARDWARE_SPDIFOUT;
+		case 0x3D43: return HARDWARE_STANDALONEMIDI;
 		case 0x3D44: return HARDWARE_CCMODE;
 		case 0x3D45: return HARDWARE_STANDALONEARC;
 		case 0x3D46: return HARDWARE_OPTICALOUT;
@@ -200,6 +198,8 @@ static enum control regtoctl(int reg, struct param *p) {
 		case 0x3F00: return HARDWARE_DSPVERLOAD;
 		case 0x3F01: return HARDWARE_DSPSTATUS;
 		case 0x3F02: return HARDWARE_DSPAVAIL;
+
+		case 0x3F9E: return SETUP_ARCLEDS;
 
 		default:   return UNKNOWN;
 	}
@@ -335,6 +335,8 @@ ctltoreg(enum control ctl, const struct param *p)
 		case HARDWARE_DSPVERLOAD:     return 0x3F00;
 		case HARDWARE_DSPSTATUS:      return 0x3F01;
 		case HARDWARE_DSPAVAIL:       return 0x3F02;
+
+		case SETUP_STORE:             return 0x3F97;
 
 		case REFRESH:                 return 0x3F99;
 		default:                      break;
