@@ -83,6 +83,46 @@ For example:
 oscmix 6<>/dev/rmidi1 7>&6
 ```
 
+### macOS (Darwin)
+
+On macOS (Darwin) systems, you can build and launch oscmix, too.
+
+At least, Xcode Command Line Tools are neccesary (not needed if you have Xcode installed). 
+
+You can install the Xcode Command Line Tools via:
+
+```sh
+xcode-select --install
+```
+
+Afterwards, go to the cloned oscmix directory (assure you are on dev branch) and buid oscmix via:
+
+```sh
+make oscmix
+```
+
+Additionally you need to build coremidiio via: 
+
+```sh
+make oscmix
+```
+
+If this is done, check your port number and remember the exact name of your unit:
+
+```sh
+./coremidiio -l
+```
+
+For example, if your unit would appear like this...
+"4  	Fireface 802 (12345678) Port 2"
+...the corresponding command would be:
+
+```sh
+./coremidiio -f 6,7 -p 4 ./oscmix -p 'Fireface 802 (12345678) Port 2'
+```
+Note: you can also set MIDIPORT env variable to 'Fireface 802 (12345678) Port 2' in this example.
+
+
 ## GTK UI
 
 The [gtk](gtk) directory contains oscmix-gtk, a GTK frontend that
