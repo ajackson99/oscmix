@@ -137,10 +137,9 @@ setreg(unsigned reg, unsigned val)
 	unsigned par;
 
 	val &= 0xffff;
-	if (dflag && reg != 0x3f00)
-		fprintf(stderr, "setreg %.4X %.4X\n", reg, val);
-if (reg != 0x3f00)
-		fprintf(stderr, "setreg verbose %.4X %.4X\n", reg, val);
+	if (dflag && reg != 0x3f00) fprintf(stderr, "setreg %.4X %.4X\n", reg, val);
+	// debug for webui
+	//if (reg != 0x3f00) fprintf(stderr, "WEBUI: setreg %.4X %.4X\n", reg, val);
 	regval = (reg & 0x7fff) << 16 | val;
 	par = regval >> 16 ^ regval;
 	par ^= par >> 8;
@@ -277,8 +276,6 @@ setmixlevel(const struct input *in, const struct output *out, float level)
 
 	setreg(reg, val);
 }
-
-
 
 
 
@@ -1781,8 +1778,9 @@ init(const char *port)
 	extern const struct device ff802;
 	extern const struct device ffufxiii;
 	extern const struct device ffucx;
+	extern const struct device ffufxp;
 	static const struct device *devices[] = {
-		&ffucxii, &ff802, &ffufxiii, &ffucx,
+		&ffucxii, &ff802, &ffufxiii, &ffucx, &ffufxp,
 	};
 	int i;
 	size_t namelen;
