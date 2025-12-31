@@ -33,7 +33,47 @@ Each arch is available for linux and darwin (macOS).
 
 Check the release section at: https://github.com/huddx01/oscmix/releases
 
-## Usage
+## Building
+
+If you prefer building your own from the sources, follow the steps below...
+
+### 1. Install Dependancies
+
+#### For Debian/Ubuntu:
+```shell
+sudo apt update
+sudo apt install -y libasound2-dev pkg-config libgtk-3-dev libglib2.0-dev clang lld git
+```
+#### For Darwin(macOS):
+**TODO** Document the dependancies for macOS here.
+
+### 2. Download Repository
+- 2a) If you want use this dev branch:
+```shell
+git clone https://github.com/huddx01/oscmix.git
+cd oscmix
+git switch dev
+```
+- 2b) Or, if you want use 
+[michaelforney](https://github.com/michaelforney)’s original repo: 
+```shell
+git clone https://github.com/michaelfourney/oscmix.git
+cd oscmix
+```
+
+### 3. Build
+From the oscmix dir, use make to build the binaries.
+```shell
+make oscmix
+make alsaseqio
+make alsarawio
+make gtk
+make tools/regtool
+```
+If you want to build the wasm too (needed for own webserver), you'll need additional dependancies. 
+See: https://github.com/huddx01/oscmix/edit/dev/README.md#web-ui
+
+## General Oscmix Usage
 
 ```
 oscmix [-dl] [-r recvaddr] [-s sendaddr]
