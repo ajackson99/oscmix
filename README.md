@@ -1,3 +1,5 @@
+[![Build and Release](https://github.com/huddx01/oscmix/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/huddx01/oscmix/actions/workflows/build.yml)
+
 ⚠️ Note
 
 You have reached my dev branch which is a fork of https://github.com/michaelforney/oscmix.
@@ -6,7 +8,6 @@ Keep in mind that this content may be untested/experimental/wip state.
 
 
 # oscmix
-[![Build and Release](https://github.com/huddx01/oscmix/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/huddx01/oscmix/actions/workflows/build.yml)
  
 oscmix implements an OSC API for some RME's Fireface units running in
 class-compliant mode, allowing full control of the device's
