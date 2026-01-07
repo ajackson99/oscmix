@@ -1,3 +1,4 @@
+
 * {
 	font-family: sans-serif;
 }
@@ -124,6 +125,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	overflow: clip;
 }
 .channel-outer [data-flags]:not(
+
 .channel-outer[data-flags~="input"] [data-flags~="input"],
 .channel-outer[data-flags~="output"] [data-flags~="output"],
 .channel-outer[data-flags~="playback"] [data-flags~="playback"],
@@ -177,9 +179,56 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 .channel-name:read-only {
 	outline: none;
 }
+
 .channel-pan {
 	text-align: center;
+	height: 80px;
+	width: 80px;
 }
+
+
+.channel-pan[type="range"] {
+	appearance: none;
+	border-radius: 4px;
+	border: 1px solid green;
+	background-color: darkgray;
+}
+
+
+.channel-volume input[type="range"] {
+	appearance: none;
+	width: 4px;
+	border-radius: 6px;
+	border: 6px solid darkgray;
+	background-color: black
+}
+
+.channel-volume input[type="range"]::-webkit-slider-thumb {
+	appearance: none;
+	width: 18px;
+	height: 54px;
+	background: url('../../img/fader_silver.png') no-repeat;
+	background-size: 18px 54px;
+	background-position: 0 1px;
+	transform: translateY(3px);
+	margin-left: -18px;
+}
+
+.channel-volume input[type="range"]::-moz-range-thumb {
+	width: 18px;
+	height: 54px;
+	background: url('../../img/fader_silver.png') no-repeat;
+	background-size: 18px 54px;
+	background-position: 0 1px;
+	transform: translateY(3px);
+	margin-left: -18px;
+	border: none;
+}
+
+input[type=range]:focus {
+	outline: none;
+}
+
 .channel-mute {
 	display: flex;
 	justify-content: center;
@@ -206,6 +255,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	min-height: 0;
 }
 .channel-volume meter {
+	min-width: 22%;
 	height: auto;
 }
 .channel-volume meter::-webkit-meter-optimum-value {
@@ -238,6 +288,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 .channel-volume meter:-moz-meter-sub-sub-optimum {
 	background: #F44336;
 }
+
 
 .channel-volume > :first-child {
 	margin-left: auto;
@@ -296,9 +347,9 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	font-size: 0.9em;
 }
 .eq-plot {
-	border: 1px solid;
-	border-radius: 3px;
-	background-color: white;
+	border: 2px solid;
+	border-radius: 8px;
+	background: linear-gradient(to right, #400000, #004000, #000040);
 	box-sizing: border-box;
 	width: 100%;
 	height: 75px;
@@ -346,13 +397,116 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	text-align: center;
 }
 
+.durec-controls {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.5rem;
+	margin-top: 1rem;
+}
+
+#durec-time {
+	width: 100%;
+	margin: 0.5rem 0;
+}
+
+.fx-control {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.fx-slider {
+	height: 80px;
+	width: 20px;
+}
+.fx-slider {
+	-webkit-appearance: slider-vertical;
+	writing-mode: bt-lr;
+}
+
+/*knob*/
+
+.knob-container {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	padding: 5px;
+}
+.knob {
+	border-radius: 50%;
+	background: #555;
+	position: relative;
+	cursor: pointer;
+	box-shadow:
+	inset 0 0 10px rgba(0,0,0,0.5),
+	0 2px 5px rgba(0,0,0,0.3);
+	transform: rotate(-135deg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	border: 2px solid orange;
+	min-width: 25px;
+	min-height: 25px;
+}
+
+.knob::after {
+	content: '';
+	position: absolute;
+	bottom: 2px;
+	width: 3px;
+	height: 10px;
+	background: #fff;
+	border-radius: 2px;
+	box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.knob-value {
+	font-size: 12px;
+	font-weight: bold;
+	min-width: 50px;
+	text-align: left;
+	padding: 5px;
+	text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+}
+
+osc-knob {
+	border-radius: 50%;
+	background: #555;
+	position: relative;
+	cursor: pointer;
+	box-shadow:
+	inset 0 0 10px rgba(0,0,0,0.5),
+	0 2px 5px rgba(0,0,0,0.3);
+	transform: rotate(-135deg);
+	display: flex;
+	align-items: center;
+
+	justify-content: center;
+	overflow: hidden;
+	border: 2px solid #00ffa1;
+	width:25px;
+	height:25px;
+	min-width: 25px;
+	min-height: 25px;
+}
+
+osc-knob::after {
+	content: '';
+	position: absolute;
+	bottom: 2px;
+	width: 2px;
+	height: 10px;
+	background: #fff;
+	border-radius: 2px;
+	box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
 .meter-wrapper {
 	width: 10px;
 	border: 1px solid gray;
 	border-radius: 4px;
 	overflow: hidden;
 	margin: 2px 4px;
-	/* Statischer vertikaler Farbverlauf von unten nach oben */
 	background: linear-gradient(to top,
 	#4CAF50 0%,
 	#FFC107 50%,
@@ -367,59 +521,7 @@ label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocke
 	left: 0;
 	width: 100%;
 	height: 0%;
-	background-color: black; /* Maskenfarbe */
-	/* Maske = nur dieser Bereich ist sichtbar */
+	background-color: black;
 	mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.51) 0%, transparent 100%);
 	-webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, transparent 100%);
-}
-/* Setups Section Styles */
-.slot-selection {
-	margin-bottom: 10px;
-}
-
-.slot-buttons {
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 5px;
-}
-
-.slot-button {
-	padding: 8px 5px;
-	background-color: #333;
-	border: 1px solid #555;
-	color: #ddd;
-	cursor: pointer;
-	text-align: center;
-	border-radius: 3px;
-	font-size: 0.9em;
-	transition: all 0.2s ease;
-}
-
-.slot-button:hover {
-	background-color: #444;
-}
-
-.slot-button.active {
-	background-color: #4CAF50;
-	color: white;
-	border-color: #388E3C;
-}
-
-.store-action {
-	margin-top: 10px;
-}
-
-#store-button {
-	padding: 10px;
-	background-color: #f44336;
-	color: white;
-	border: none;
-	cursor: pointer;
-	width: 100%;
-	border-radius: 3px;
-	font-weight: bold;
-}
-
-#store-button:hover {
-	background-color: #d32f2f;
 }

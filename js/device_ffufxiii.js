@@ -1,7 +1,8 @@
+
 // device_ffufxiii.js
 export const device_ffufxiii = {
 	deviceName: 'Fireface UFX III',
-	midiPortNames: ['Port R', 'Port 4'], // Possible MIDI port names
+	midiPortNames: ['Port R', 'Port 4', ':3' ], // Possible MIDI port names
 	inputNames: [
 		'Analog 1', 'Analog 2', 'Analog 3', 'Analog 4',
 		'Analog 5', 'Analog 6', 'Analog 7', 'Analog 8',
@@ -51,10 +52,8 @@ export const device_ffufxiii = {
 					flags.push('reflevel');
 			}
 		}
-		//if (type === 'playback') flags.push('playback');
+		if (type === 'playback') flags.push('playback');
 		if (type === 'output') {
-			flags.push('volumecal');
-			flags.push('roomeq');
 			if (index <= 11) flags.push('reflevel');
 		}
 		return flags;

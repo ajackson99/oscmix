@@ -15,11 +15,12 @@
 	overflow-y: auto;
 	z-index: 1000;
 	box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+	color: #e0e0e0;
 }
 
-#help-popup h2 {
-	margin-top: 0;
-	color: #333;
+#help-popup h1, #help-popup h3 {
+	color: #f0f0f0;
+	margin-top: 15px;
 }
 
 #help-overlay {
@@ -41,19 +42,31 @@
 
 .param-table th, .param-table td {
 	border: 1px solid #bebbbb;
-	padding: 8px;
+	padding: 10px;
 	text-align: left;
 }
 
 .param-table th {
 	background-color: #76717194;
+	color: #fff;
 }
 
 .param-table code {
 	background: #4c4c4c9c;
-	padding: 2px 5px;
+	padding: 3px 6px;
 	border-radius: 3px;
 	font-family: monospace;
+	color: #f0f0f0;
+}
+
+.url-example {
+	display: block;
+	word-break: break-all;
+	margin: 5px 0;
+	color: #9eff9e;
+	background: #3e3e3ecc;
+	padding: 5px;
+	border-radius: 4px;
 }
 
 .close-button {
@@ -62,7 +75,11 @@
 	right: 15px;
 	font-size: 24px;
 	cursor: pointer;
-	color: #777;
+	color: #aaa;
+}
+
+.close-button:hover {
+	color: #fff;
 }
 
 .help-button {
@@ -80,7 +97,7 @@
 /* Additional styles */
 .current-url-container {
 	background: #3e3e3ecc;
-	border: 1px solid #ddd;
+	border: 1px solid #555;
 	padding: 10px;
 	margin: 15px 0;
 	border-radius: 4px;
@@ -90,11 +107,16 @@
 .current-url-container code {
 	font-size: 14px;
 	word-break: break-all;
+	color: #9eff9e;
 }
 
 .dynamic-url {
 	display: block;
 	margin: 5px 0;
+	color: #9eff9e;
+	background: #3e3e3ecc;
+	padding: 5px;
+	border-radius: 4px;
 }
 
 .copy-section {
@@ -121,4 +143,32 @@
 #copy-status {
 	color: #2e7d32;
 	font-size: 14px;
+}
+
+/* Stile für die Copy-Buttons */
+.copy-btn {
+	padding: 5px 10px;
+	background-color: #5a7f5a;
+	color: white;
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-size: 12px;
+	transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+	background-color: #486a48;
+}
+
+.copy-btn.copied {
+	background-color: #2E7D32;
+}
+
+ul {
+	padding-left: 20px;
+}
+
+li {
+	margin-bottom: 15px;
 }

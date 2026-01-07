@@ -1,3 +1,4 @@
+
 'use strict';
 
 import { Knob } from './knob.js';
@@ -5,12 +6,10 @@ import { device_ff802 } from './device_ff802.js';
 import { device_ffucxii } from './device_ffucxii.js';
 import { device_ffufxiii } from './device_ffufxiii.js';
 import { device_ffucx } from './device_ffucx.js';
-import { device_ffufxp } from './device_ffufxp.js';
+import { device_ffucx } from './device_ffufxp.js';
 
 const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx, device_ffufxp];
-//let currentDevice = device_ff802;
-let currentDevice = device_ffufxiii;
-
+let currentDevice = device_ff802;
 updatePageTitle();
 
 // ARC Conn state
@@ -171,7 +170,7 @@ class ConnectionMIDI extends AbortController {
 			},
 		};
 		if (!ConnectionMIDI.#module)
-			ConnectionMIDI.#module = WebAssembly.compileStreaming(fetch('oscmix.wasm'));
+			ConnectionMIDI.#module = WebAssembly.compileStreaming(fetch('wasm/oscmix.wasm'));
 		this.ready = ConnectionMIDI.#module.then(async (module) => {
 			instance = await WebAssembly.instantiate(module, imports);
 			this.signal.throwIfAborted();
@@ -1489,13 +1488,13 @@ function setupInterface() {
 		const register = parseInt(regInput.value.replace(/\s/g, ''), 16);
 		const value = parseInt(valInput.value.replace(/\s/g, ''), 16);
 		if (isNaN(register) || isNaN(value)) {
-			alert("Bitte gültige Hexadezimalwerte eingeben! (z.B. 0x1234 oder 5678)");
+			alert("Only hex format allowed! (0x1234 or 5678)");
 			return;
 		}
 		try {
 			iface.send('/register', ',ii', [register, value]);
 			iface.send('/refresh', ',', []);
-			console.log(`Registerbefehl gesendet: 0x${register.toString(16)} = 0x${value.toString(16)}`);
+			console.log(`Reg command sent: 0x${register.toString(16)} = 0x${value.toString(16)}`);
 		} catch (e) {
 			console.error("Error while tried to send Reg/Val: ", e);
 		}
@@ -1524,7 +1523,7 @@ function setupInterface() {
 		if (arcControlWindow && !arcControlWindow.closed) {
 			arcControlWindow.focus();
 		} else {
-			arcControlWindow = window.open('arc_control.html', 'ARC Control', 'width=800,height=600');
+			arcControlWindow = window.open('arc.html', 'ARC Control', 'width=800,height=600');
 
 			window.addEventListener('message', (event) => {
 				if (event.origin !== window.location.origin) return;
@@ -1538,7 +1537,7 @@ function setupInterface() {
 					}
 				}
 				else if (event.data.type === 'OSC_COMMAND') {
-					console.log('Empfangener OSC-Befehl:', event.data);
+					console.log('Received OSC-Command:', event.data);
 					iface.send(event.data.command, ',i', event.data.args);
 				}
 			});

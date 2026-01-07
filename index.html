@@ -1,15 +1,20 @@
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<title>oscmix Generic</title>
-		<link rel="preload" href="style_tm_dark.css" as="style">
-		<link rel="preload" href="help/help.css" as="style">
-		<link rel="stylesheet" href="style_tm_dark.css"/>
-		<link rel="stylesheet" href="help/help.css" media="print" onload="this.media='all'"/>
-		<link rel="preload" href="oscmix.js" as="script">
-		<link rel="preload" href="url_params.js" as="script">
-		<link rel="preload" href="help/help.js" as="script">
-		<link rel="stylesheet" href="knob.css">
+		<link rel="preload" href="css/theme/tm_dark.css" as="style">
+		<link rel="stylesheet" href="css/theme/tm_dark.css" />
+		
+		<link rel="preload" href="css/help.css" as="style">
+		<link rel="stylesheet" href="css/help.css" media="print" onload="this.media='all'" />
+		
+		<link rel="stylesheet" href="css/knob.css">
+		
+		<link rel="preload" href="js/oscmix.js" as="script">
+		<link rel="preload" href="js/param.js" as="script">
+		<link rel="preload" href="js/help.js" as="script">
+		
 	</head>
 	<body>
 		<template id="channel-template">
@@ -250,10 +255,10 @@
 					<fieldset>
 						<label>Theme:
 							<select id="ui-style-select">
-								<option value="style.css">Minimal</option>
-								<option value="style_cust.css">Custom</option>
-								<option value="style_tm_light.css">TM light</option>
-								<option value="style_tm_dark.css">TM dark</option>
+								<option value="css/theme/default.css">Minimal</option>
+								<option value="css/theme/cust.css">Custom</option>
+								<option value="css/theme/tm_light.css">TM light</option>
+								<option value="css/theme/tm_dark.css">TM dark</option>
 							</select>
 						</label>
 					</fieldset>
@@ -314,17 +319,14 @@
 				</form>
 			</details>
 			<hr>
-
-				<details open>
-					<summary>ARC USB</summary>
-					<fieldset>
-						<label title="ARC USB Control">ARC Control
-						<button id="open-arc-control">Open Panel</button>
-						</label>
-					</fieldset>
-				</details>
-
-		
+			<details open>
+				<summary>ARC USB</summary>
+				<fieldset>
+					<label title="ARC USB Control">ARC Control
+					<button id="open-arc-control">Open ARC</button>
+					</label>
+				</fieldset>
+			</details>
 			<hr>
 			<details open>
 				<summary>Setups</summary>
@@ -661,9 +663,9 @@
 				}
 			});
 		</script>
-		<script type="module" src="oscmix.js" defer></script>
-		<script src="url_params.js" defer></script>
-		<script src="help/help.js" defer></script>
-		<script type="module" src="knob.js" defer></script>
+		<script type="module" src="js/oscmix.js" defer></script>
+		<script src="js/param.js" defer></script>
+		<script src="js/help.js" defer></script>
+		<script type="module" src="js/knob.js" defer></script>
 	</body>
 </html>

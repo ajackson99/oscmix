@@ -1,3 +1,4 @@
+
 function getUrlParams() {
 	const params = new URLSearchParams(window.location.search);
 	return {
@@ -28,7 +29,7 @@ function setSelectByText(selectElement, textValue) {
 		}
 	}
 	
-	console.warn(`Gerät nicht gefunden: "${textValue}"`);
+	console.warn(`Device not found: "${textValue}"`);
 	return false;
 }
 
@@ -78,7 +79,7 @@ function configureFromUrl() {
 			clearInterval(checkInterval);
 		}, 300);
 	} catch (error) {
-		console.error("Fehler bei URL-Konfiguration:", error);
+		console.error("Error in URL config:", error);
 	}
 }
 

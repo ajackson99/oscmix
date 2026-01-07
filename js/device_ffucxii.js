@@ -1,3 +1,4 @@
+
 // device_ffucxii.js
 export const device_ffucxii = {
 	deviceName: 'Fireface UCX II',

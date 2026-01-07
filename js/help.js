@@ -1,11 +1,13 @@
+
 document.addEventListener('DOMContentLoaded', function() {
-	fetch('help/help.html')
+	fetch('help.html')
 		.then(response => response.text())
 		.then(html => {
 			document.getElementById('help-container').innerHTML = html;
 			setupHelpPopup();
 			updateDynamicUrls();
 			setupCopyButton();
+			setupCopyButtons();
 		})
 		.catch(error => console.error('Fehler beim Laden des Hilfe-Popups:', error));
 });
@@ -49,8 +51,9 @@ function updateDynamicUrls() {
 		baseUrlElement.textContent = baseUrl;
 	}
 	
-	const dynamicUrls = document.querySelectorAll('.dynamic-url');
-	dynamicUrls.forEach(element => {
+	// Update all URL examples
+	const urlExamples = document.querySelectorAll('.dynamic-url, .url-example');
+	urlExamples.forEach(element => {
 		const params = element.getAttribute('data-params');
 		element.textContent = `${baseUrl}?${params}`;
 	});
@@ -79,5 +82,33 @@ function setupCopyButton() {
 				copyStatus.textContent = 'Failed to copy';
 				console.error('Failed to copy URL:', err);
 			});
+	});
+}
+
+function setupCopyButtons() {
+	const copyButtons = document.querySelectorAll('.copy-btn');
+	const baseUrl = window.location.origin + window.location.pathname;
+	
+	copyButtons.forEach(button => {
+		button.addEventListener('click', function() {
+			const params = this.getAttribute('data-params');
+			const urlToCopy = `${baseUrl}?${params}`;
+			
+			navigator.clipboard.writeText(urlToCopy)
+				.then(() => {
+					// Visual feedback
+					const originalText = this.textContent;
+					this.textContent = 'Copied!';
+					this.classList.add('copied');
+					
+					setTimeout(() => {
+						this.textContent = originalText;
+						this.classList.remove('copied');
+					}, 2000);
+				})
+				.catch(err => {
+					console.error('Failed to copy URL:', err);
+				});
+		});
 	});
 }

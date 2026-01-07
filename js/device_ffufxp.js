@@ -1,3 +1,4 @@
+
 // device_ffufxp.js
 export const device_ffufxp = {
 	deviceName: 'Fireface UFX+',
