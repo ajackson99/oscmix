@@ -18,8 +18,8 @@ static const struct device *devices[] = {
 
 // TODO: Rework this, to set current_device based on user selection in settings or even better via auto-detect
 //const struct device *current_device = &ff802;
-const struct device *current_device = &ffufxiii;
-//const struct device *current_device = &ffufxp;
+//const struct device *current_device = &ffufxiii;
+const struct device *current_device = &ffufxp;
 
 
 
