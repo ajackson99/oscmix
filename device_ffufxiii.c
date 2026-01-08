@@ -240,7 +240,6 @@ regtoctl(int reg, struct param *p)
 		case 0x3050: return CTLROOM_MAINOUT;
 		case 0x3051: return CTLROOM_MAINMONO;
 		case 0x3052: return CTLROOM_MUTEENABLE;
-
 		case 0x3053: return CTLROOM_DIMREDUCTION;
 		case 0x3054: return CTLROOM_DIM;
 		case 0x3055: return CTLROOM_RECALLVOLUME;
@@ -498,7 +497,7 @@ static int ctltoreg(enum control ctl, const struct param *p)
 const struct device ffufxiii = {
 	.id = "ffufxiii",
 	.name = "Fireface UFX III",
-	.version = 24,
+	.version = 25,
 	.flags = DEVICE_HAS_DUREC | DEVICE_HAS_ROOMEQ,
 	.inputs = inputs,
 	.inputslen = LEN(inputs),

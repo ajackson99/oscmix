@@ -528,6 +528,12 @@ newdspstatus(struct context *ctx, int val)
 }
 
 static void
+newdim(struct context *ctx, int val)
+{
+	oscsend(ctx->addr, ",i", val < 0 ? 0 : val);
+}
+
+static void
 newarcdelta(struct context *ctx, int val)
 {
 	oscsend("/hardware/arcdelta", ",i", val );
@@ -1364,7 +1370,7 @@ static const struct node roottree[] = {
 		{"mainmono", CTLROOM_MAINMONO, .set=setbool, .new=newbool},
 		{"muteenable", CTLROOM_MUTEENABLE, .set=setbool, .new=newbool},
 		{"dimreduction", CTLROOM_DIMREDUCTION, .set=setfixed, .new=newfixed, .scale=0.1, .min=-650, .max=0},
-		{"dim", CTLROOM_DIM, .set=setbool, .new=newbool},
+		{"dim", CTLROOM_DIM, .set=setbool, .new=newdim},
 		{"recallvolume", CTLROOM_RECALLVOLUME, .set=setfixed, .new=newfixed, .scale=0.1, .min=-650, .max=0},
 		{0},
 	}},

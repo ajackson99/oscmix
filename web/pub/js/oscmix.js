@@ -1425,13 +1425,7 @@ function setupInterface() {
 	iface.bind("/controlroom/mainout", ",i", document.getElementById("controlroom-mainout"), "selectedIndex", "change");
 	iface.bind("/controlroom/mainmono", ",i", document.getElementById("controlroom-mainmono"), "checked", "change");
 	iface.bind("/controlroom/muteenable", ",i", document.getElementById("controlroom-muteenable"), "checked", "change");
-	iface.bind(
-		"/controlroom/dimreduction",
-		",f",
-		document.getElementById("controlroom-dimreduction"),
-		"valueAsNumber",
-		"change"
-	);
+	iface.bind("/controlroom/dimreduction", ",f",document.getElementById("controlroom-dimreduction"), "valueAsNumber", "change");
 	iface.bind("/controlroom/dim", ",i", document.getElementById("controlroom-dim"), "checked", "change");
 	iface.bind(
 		"/controlroom/recallvolume",
@@ -1607,7 +1601,7 @@ function setupInterface() {
 						);
 					}
 				} else if (event.data.type === "OSC_COMMAND") {
-					console.log("Received OSC-Command:", event.data);
+					console.log("Received ARC OSC_COMMAND: ", event.data);
 					iface.send(event.data.command, ",i", event.data.args);
 				}
 			});
