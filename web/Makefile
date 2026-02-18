@@ -13,7 +13,7 @@ LDFLAGS=$(WASM_LDFLAGS)
 .PHONY: all
 all: oscmix.wasm
 
-OBJ=oscmix.o osc.o sysex.o util.o wasm.o device_ffucxii.o device_ff802.o device_ffufxiii.o device_ffucx.o device_ffufxp.o
+OBJ=oscmix.o osc.o sysex.o util.o wasm.o device_ffucxii.o device_ff802.o device_ffufxiii.o device_ffucx.o device_ffufxp.o device_ffufxii.o
 
 oscmix.o: ../oscmix.c
 	$(CC) $(CFLAGS) -c -o $@ ../oscmix.c
@@ -41,6 +41,9 @@ device_ffucx.o: ../device_ffucx.c
 
 device_ffufxp.o: ../device_ffufxp.c
 	$(CC) $(CFLAGS) -c -o $@ ../device_ffufxp.c
+
+device_ffufxii.o: ../device_ffufxii.c
+	$(CC) $(CFLAGS) -c -o $@ ../device_ffufxii.c
 
 oscmix.wasm: $(OBJ) oscmix.imports
 	$(CC) $(LDFLAGS) -o $@ -Wl,--export=init,--export=handletimer,--export=handlesysex,--export=handleosc,--export=jsdata,--export=jsdatalen -Wl,--allow-undefined-file=oscmix.imports $(OBJ)
