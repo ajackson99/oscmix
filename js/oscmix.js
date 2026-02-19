@@ -6,8 +6,9 @@ import { device_ffucxii } from "./device_ffucxii.js";
 import { device_ffufxiii } from "./device_ffufxiii.js";
 import { device_ffucx } from "./device_ffucx.js";
 import { device_ffufxp } from "./device_ffufxp.js";
+import { device_ffufxii } from "./device_ffufxii.js";
 
-const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx, device_ffufxp];
+const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx, device_ffufxp, device_ffufxii];
 let currentDevice = device_ffufxiii;
 updatePageTitle();
 
@@ -1083,13 +1084,9 @@ class Channel {
 			});
 		}
 
-		// In der Channel-Klasse, Mute-Checkbox anpassen:
 		const muteCheckbox = fragment.querySelector(".mute-checkbox");
 		if (muteCheckbox) {
-			// Bindet OSC-Adresse an die Checkbox
 			iface.bind(prefix + "/mute", ",i", muteCheckbox, "checked", "change");
-
-			// Visuelles Feedback für Mute-Status
 			muteCheckbox.addEventListener("change", (event) => {
 				const channelElement = event.target.closest(".channel");
 				if (channelElement) {
@@ -1135,7 +1132,7 @@ class Channel {
 					case HTMLInputElement:
 						switch (node.type) {
 							case "number":
-							case "range": // Füge range hinzu
+							case "range":
 								prop = "valueAsNumber";
 								break;
 							case "checkbox":
@@ -1277,7 +1274,7 @@ function setupInterface() {
 						console.log("Active device:", currentDevice.deviceName);
 						reinitializeUI();
 						updateConnectionStatus(
-							false, // Noch nicht verbunden
+							false,
 							false,
 							currentDevice.deviceName
 						);
@@ -1316,9 +1313,6 @@ function setupInterface() {
 			connection.abort();
 			reinitializeUI();
 		}
-		//		if (event.submitter.id == 'connection-refresh') {
-		//			iface.send('/refresh', ',', []);
-		//		}
 		event.preventDefault();
 		if (connection) connection.abort();
 		delete icon.dataset.state;
