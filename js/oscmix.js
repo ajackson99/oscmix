@@ -1009,10 +1009,8 @@ class Channel {
 			if (view.meterrms.checked) index += 1;
 			if (view.meterfx.checked && args.length >= 4) index += 2;
 			const value = Math.max(args[index], -65);
-
-			const percent = Math.min(100, Math.max(0, ((value + 65) / 71) * 100));
+			const percent = Math.min(100, Math.max(0, ((6 - value) / 71) * 100));
 			this.meter.querySelector(".meter-fill").style.height = `${percent}%`;
-
 			this.meterValue.textContent = value == -Infinity ? "UFL" : value.toFixed(1);
 		});
 		if (left) {

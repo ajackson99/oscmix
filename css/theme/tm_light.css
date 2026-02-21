@@ -1,4 +1,3 @@
-
 :root {
 	/* Base Colors */
 	--background-color: #ffffff;
@@ -26,9 +25,11 @@
 	--adhoc-highlight-color-shadow: rgb(122 99 42 / 82%);
 
 	/* Meter-colors */
-	--meter-green: #4CAF50;
-	--meter-yellow: #FFC107;
-	--meter-red: #F44336;
+	--meter-red: #f33628;
+	--meter-orange: #ff8100;
+	--meter-yellow: #d1f000;
+	--meter-green: #03ff00;
+	--meter-bg-color: #222;
 
 	/* EQ-colors */
 	--eq-plot-bg: linear-gradient(to right, #6b0202c7, #004000b8, #000040bf);
@@ -653,21 +654,19 @@ osc-knob::after {
 	margin: 2px 4px;
 	background: linear-gradient(to top,
 	var(--meter-green) 0%,
-	var(--meter-yellow) 50%,
-	var(--meter-red) 100%
-	);
+	var(--meter-yellow) 70%,
+	var(--meter-orange) 80%,
+	var(--meter-red) 100%);
 	position: relative;
 }
 
 .meter-fill {
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	left: 0;
 	width: 100%;
-	height: 0%;
-	background-color: black;
-	mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.51) 0%, transparent 100%);
-	-webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.45) 0%, transparent 100%);
+	height: 100%;
+	background-color: var(--meter-bg-color);
 }
 
 /* FX Styling */
