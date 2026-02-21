@@ -10,6 +10,9 @@ import { device_ffufxii } from "./device_ffufxii.js";
 
 const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx, device_ffufxp, device_ffufxii];
 let currentDevice = device_ffufxiii;
+
+let arcControlWindow = null;
+
 updatePageTitle();
 
 // ARC Conn state
@@ -683,7 +686,6 @@ class Channel {
 		const view = document.forms.view.elements;
 		const gainTarget = fragment.querySelector('label[data-flags="gain"] .knob-target');
 		if (gainTarget) {
-			// Erstelle den Knob
 			const gainKnob = new Knob({
 				id: `gain-${type}-${index}`,
 				min: 0,
@@ -696,20 +698,17 @@ class Channel {
 				sendDuringDrag: true,
 				sendInterval: 150,
 				borderColor: "#000000ab",
-				valueColor: "#ffcc00" // Gelb-orange Schrift
+				valueColor: "#ffcc00"
 			});
 
-			// Füge den Knob in den Container ein
 			gainTarget.innerHTML = "";
 			gainTarget.appendChild(gainKnob.element);
 
-			// Event-Handler für Benutzeränderungen
 			gainKnob.element.addEventListener("user-change", (event) => {
 				const value = event.detail.value;
 				iface.send(`/${type}/${index + 1}/gain`, ",f", [value]);
 			});
 
-			// OSC-Update-Handler
 			iface.methods.set(`/${type}/${index + 1}/gain`, (args) => {
 				gainKnob.updateFromOSC(args[0]);
 			});
@@ -729,8 +728,8 @@ class Channel {
 				resetValue: 0,
 				sendDuringDrag: true,
 				sendInterval: 150,
-				borderColor: "#000000ab", // Roter Rand
-				valueColor: "orange" // Gelb-orange Schrift
+				borderColor: "#000000ab",
+				valueColor: "orange"
 			});
 			panTarget.innerHTML = "";
 			panTarget.appendChild(panKnob.element);
@@ -1572,7 +1571,6 @@ function setupInterface() {
 		console.log(`Setup has been stored. Slot: ${selectedSlot + 1}`);
 	});
 	// ARC LEDs
-	let arcControlWindow = null;
 	document.getElementById("open-arc-control").addEventListener("click", () => {
 		if (arcControlWindow && !arcControlWindow.closed) {
 			arcControlWindow.focus();
