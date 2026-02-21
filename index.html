@@ -1013,16 +1013,32 @@
 				<summary>Debug</summary>
 				<form id="debug">
 					<fieldset>
-						<label
-							>Register (0x...)
+						<legend>Logging Options</legend>
+						<label>
+							<input type="checkbox" id="debug-incoming" checked> Log incoming OSC
+						</label><br>
+						<label>
+							<input type="checkbox" id="debug-outgoing" checked> Log outgoing OSC
+						</label><br>
+						<label>
+							<input type="checkbox" id="debug-level"> Log level meter messages
+						</label><br>
+						<label>
+							<input type="checkbox" id="debug-arc"> Log ARC messages (buttons/delta)
+						</label><br>
+						<label>
+							<input type="checkbox" id="debug-other"> Log other OSC messages
+						</label>
+					</fieldset>
+					<fieldset>
+						<legend>Register/Value</legend>
+						<label>Register (0x...)
 							<input id="debug-register" />
 						</label>
-						<label
-							>Value (0x...)
+						<label>Value (0x...)
 							<input id="debug-value" />
 						</label>
-						<label
-							>Send to Unit
+						<label>Send to Unit
 							<button id="debug-set-register">Set</button>
 						</label>
 					</fieldset>

@@ -13,6 +13,49 @@ let currentDevice = device_ffufxiii;
 
 let arcControlWindow = null;
 
+// Debug flags
+let debugFlags = {
+	incoming: true,
+	outgoing: true,
+	level: false,
+	arc: false,
+	other: true
+};
+
+// Load debug flags from localStorage
+function loadDebugFlags() {
+	const saved = localStorage.getItem('debugFlags');
+	if (saved) {
+		try {
+			const parsed = JSON.parse(saved);
+			debugFlags = { ...debugFlags, ...parsed };
+		} catch (e) {}
+	}
+	// Apply to checkboxes
+	for (const key in debugFlags) {
+		const cb = document.getElementById(`debug-${key}`);
+		if (cb) cb.checked = debugFlags[key];
+	}
+}
+
+// Save debug flags to localStorage
+function saveDebugFlags() {
+	localStorage.setItem('debugFlags', JSON.stringify(debugFlags));
+}
+
+// Setup debug flag listeners
+function setupDebugListeners() {
+	for (const key in debugFlags) {
+		const cb = document.getElementById(`debug-${key}`);
+		if (cb) {
+			cb.addEventListener('change', (e) => {
+				debugFlags[key] = e.target.checked;
+				saveDebugFlags();
+			});
+		}
+	}
+}
+
 updatePageTitle();
 
 // ARC Conn state
@@ -397,15 +440,15 @@ class Interface {
 			///---------------
 			// DEBUG LOGGING
 			// -------------
-			if (
-				!addr.match(/\/level$/) &&
-				!addr.match(/\/autolevel\/meter$/) &&
-				!addr.match(/\/dynamics\/meter$/) &&
-				!addr.match(/\/hardware\/arcdelta$/) &&
-				!addr.match(/\/hardware\/arcbuttons$/)
-			)
-				console.debug(addr, args);
+			const isLevel = addr.match(/\/level$/);
+			const isArc = addr.match(/\/hardware\/arc(delta|buttons)/);
+			const isOther = !isLevel && !isArc;
 
+			if ( (debugFlags.incoming && debugFlags.level && isLevel) ||
+				(debugFlags.incoming && debugFlags.arc && isArc) ||
+				(debugFlags.incoming && debugFlags.other && isOther) ) {
+				console.debug(addr, args);
+			}
 			const method = this.methods.get(addr);
 			if (method) method(args);
 		}
@@ -414,7 +457,9 @@ class Interface {
 	send(addr, types, args) {
 		if (!this.#connection) throw new Error("not connected");
 		if (types[0] != "," || types.length != 1 + args.length) throw new Error("invalid OSC type string");
-		console.debug(addr, types, args);
+		if (debugFlags.outgoing) {
+			console.debug('SEND', addr, types, args);
+		}
 		const encoder = new OSCEncoder();
 		encoder.putString(addr);
 		encoder.putString(types);
@@ -1591,7 +1636,9 @@ function setupInterface() {
 						);
 					}
 				} else if (event.data.type === "OSC_COMMAND") {
-					console.log("Received ARC OSC_COMMAND: ", event.data);
+					if (debugFlags.incoming) {
+						console.debug('RECEIVE - ARC OSC_COMMAND: ', event.data);
+					}
 					iface.send(event.data.command, ",i", event.data.args);
 				}
 			});
@@ -1661,4 +1708,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	setupInterface();
 	iface.initDurec();
 	setTimeout(populateDeviceSpecificOptions, 100);
+	loadDebugFlags();
+	setupDebugListeners();
 });
