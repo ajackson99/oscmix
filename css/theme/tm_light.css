@@ -1,12 +1,12 @@
 :root {
 	/* Base Colors */
-	--background-color: #ffffff;
+	--background-color: rgba(239, 239, 239, 0.8);
 	--background-sidebar-color: #ffffff;
-	--background-submix-color: #d9d9d9;
-	--text-color: #98AAB5;
+	--background-submix-color: rgb(195, 195, 195);
+	--text-color: rgba(87, 87, 87, 0.95);
 	--text-highlight-color: white;
 	--border-color: gray;
-	--border-highlight-color: lightgray;
+	--border-highlight-color: #3f3f3f;
 
 	/* Base Toggle-Button colors */
 	--toggle-hover-color: #dadbdc;
@@ -29,7 +29,7 @@
 	--meter-orange: #ff8100;
 	--meter-yellow: #d1f000;
 	--meter-green: #03ff00;
-	--meter-bg-color: #222;
+	--meter-bg-color: #d2d2d2;
 
 	/* EQ-colors */
 	--eq-plot-bg: linear-gradient(to right, #6b0202c7, #004000b8, #000040bf);
