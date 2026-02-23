@@ -599,8 +599,7 @@
 			<details open>
 				<summary>Hardware</summary>
 				<fieldset>
-					<label
-						>LCD Contrast
+					<label>LCD Contrast
 						<input
 						type="range"
 						id="hardware-lcdcontrast"
@@ -610,8 +609,8 @@
 						step="1"
 						value="0" />
 					</label>
-					<label
-						>Clock Source<select id="clock-source">
+					<label>Clock Source
+						<select id="clock-source">
 							<option>Internal</option>
 							<option>Word Clock</option>
 							<option>AES (S/PDIF)</option>
@@ -619,30 +618,22 @@
 							<option>Opt. 2 (Optical)</option>
 							<option>MADI Opt.</option>
 							<option>MADI Coax.</option>
-						</select></label
-					>
+						</select>
+					</label>
 					<label>Sample Rate<output id="clock-samplerate"></output></label>
-					<label
-						>Wck. Out<span><input id="clock-wckout" type="checkbox" /></span
-						></label>
-					<label
-						>Wck. Single<span><input id="clock-wcksingle" type="checkbox" /></span
-						></label>
-					<label
-						>Wck. Term.<span><input id="clock-wckterm" type="checkbox" /></span
-						></label>
-					<label
-						>AES In<select id="hardware-aesin">
+					<label>Wck. Out<span><input id="clock-wckout" type="checkbox" /></span></label>
+					<label>Wck. Single<span><input id="clock-wcksingle" type="checkbox" /></span></label>
+					<label>Wck. Term.<span><input id="clock-wckterm" type="checkbox" /></span></label>
+					<label>AES In
+						<select id="hardware-aesin">
 							<option>XLR</option>
 							<option>Opt. 2</option>
-						</select></label
-					>
-					<label
-						>AES State Pro<select id="hardware-spdifout">
+						</select>
+					</label>
+					<label>AES State Pro<select id="hardware-spdifout">
 							<option>Consumer</option>
 							<option>Professional</option>
-						</select></label
-					>
+						</select></label>
 					<label
 						>Opt. 1 In<select id="hardware-opticalin">
 							<option>ADAT</option>
@@ -966,7 +957,7 @@
 						<label class="toggle-button" title="Store current state into selected setup slot on device">
 							Store<input id="store-button" type="checkbox" />
 						</label>
-						<label class="toggle-button" title="Load selected setup state from device">
+						<label class="toggle-button" title="Load selected setup state from device (Doesn't work yet - needs to be implemented)">
 							Load<input id="load-button" type="checkbox" />
 						</label>
 					</div>
@@ -989,13 +980,13 @@
 				<details>
 				<summary>UI Settings</summary>
 				<fieldset>
-					<label>Help:
+					<label title="Shows Help for URL Parameters">Help:
 						<button class="help-button" id="url-help-button">Open</button>
 					</label>
 				</fieldset>
 				<form id="ui-settings">
 					<fieldset>
-						<label>Theme:
+						<label title="Select your preferred UI Theme">Theme:
 							<select id="ui-style-select">
 								<option value="css/theme/tm_dark_hi.css">TM dark (High Contrast)</option>
 								<option value="css/theme/tm_dark.css">TM dark</option>
@@ -1013,33 +1004,33 @@
 				<summary>Debug</summary>
 				<form id="debug">
 					<fieldset>
-						<legend>Logging Options</legend>
-						<label>
-							<input type="checkbox" id="debug-incoming" checked> Log incoming OSC
+						<legend>Console Log</legend>
+						<label title="Logs incoming OSC Messages in Broser Console. For better Performance, disable if not needed.">
+							<input type="checkbox" id="debug-incoming"> Incoming OSC
 						</label><br>
-						<label>
-							<input type="checkbox" id="debug-outgoing" checked> Log outgoing OSC
+						<label title="Logs outgoing OSC Messages in Broser Console. For better Performance, disable if not needed.">
+							<input type="checkbox" id="debug-outgoing"> Outgoing OSC
 						</label><br>
-						<label>
-							<input type="checkbox" id="debug-level"> Log level meter messages
+						<label title="Logs other OSC Messages in Broser Console. For better Performance, disable if not needed.">
+							<input type="checkbox" id="debug-other"> Other OSC
 						</label><br>
-						<label>
-							<input type="checkbox" id="debug-arc"> Log ARC messages (buttons/delta)
+						<label title="Logs Level-Meter OSC Messages in Broser Console. Floods the Console! Eenable only if needed.">>
+							<input type="checkbox" id="debug-level"> Levels
 						</label><br>
-						<label>
-							<input type="checkbox" id="debug-other"> Log other OSC messages
+						<label title="Logs ARC USB related OSC Messages in Broser Console. For better Performance, disable if not needed.">>
+							<input type="checkbox" id="debug-arc"> ARC messages
 						</label>
 					</fieldset>
 					<fieldset>
 						<legend>Register/Value</legend>
-						<label>Register (0x...)
+						<label>Reg (0x...)
 							<input id="debug-register" />
 						</label>
-						<label>Value (0x...)
+						<label>Val (0x...)
 							<input id="debug-value" />
 						</label>
 						<label>Send to Unit
-							<button id="debug-set-register">Set</button>
+							<button id="debug-set-register">Fire!</button>
 						</label>
 					</fieldset>
 				</form>
