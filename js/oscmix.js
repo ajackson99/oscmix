@@ -7,6 +7,7 @@ import { device_ffufxiii } from "./device_ffufxiii.js";
 import { device_ffucx } from "./device_ffucx.js";
 import { device_ffufxp } from "./device_ffufxp.js";
 import { device_ffufxii } from "./device_ffufxii.js";
+import { RoomEQBridge, withValueCache } from './roomEq_oscbridge.js';
 
 const devices = [device_ff802, device_ffucxii, device_ffufxiii, device_ffucx, device_ffufxp, device_ffufxii];
 let currentDevice = device_ffufxiii;
@@ -151,30 +152,30 @@ class ConnectionWebSocket extends AbortController {
 		this.ready = new Promise((resolve, reject) => {
 			socket.addEventListener("open", resolve, { once: true, signal: this.signal });
 			socket.addEventListener(
-				"close",
-				(event) => {
-					const error = new Error("WebSocket closed with code " + event.code);
-					reject(error);
-					this.abort(error);
-				},
-				{ once: true, signal: this.signal }
-			);
+									"close",
+									(event) => {
+										const error = new Error("WebSocket closed with code " + event.code);
+										reject(error);
+										this.abort(error);
+									},
+									{ once: true, signal: this.signal }
+									);
 			this.signal.addEventListener(
-				"abort",
-				(event) => {
-					reject(event.target.reason);
-					socket.close();
-				},
-				{ once: true }
-			);
+										 "abort",
+										 (event) => {
+											 reject(event.target.reason);
+											 socket.close();
+										 },
+										 { once: true }
+										 );
 		});
 		socket.addEventListener(
-			"message",
-			(event) => {
-				if (this.recv) event.data.arrayBuffer().then(this.recv.bind(this));
-			},
-			{ signal: this.signal }
-		);
+								"message",
+								(event) => {
+									if (this.recv) event.data.arrayBuffer().then(this.recv.bind(this));
+								},
+								{ signal: this.signal }
+								);
 		this.send = (data) => {
 			socket.send(data);
 		};
@@ -228,67 +229,67 @@ class ConnectionMIDI extends AbortController {
 		};
 		if (!ConnectionMIDI.#module) ConnectionMIDI.#module = WebAssembly.compileStreaming(fetch("wasm/oscmix.wasm"));
 		this.ready = ConnectionMIDI.#module
-			.then(async (module) => {
-				instance = await WebAssembly.instantiate(module, imports);
-				this.signal.throwIfAborted();
-				for (const symbol of ["jsdata", "jsdatalen"]) {
-					if (!(symbol in instance.exports)) throw Error(`wasm module does not export '${symbol}'`);
-				}
-				const jsdata = instance.exports.jsdata;
-				const jsdataLen = new Uint32Array(instance.exports.memory.buffer, instance.exports.jsdatalen, 4)[0];
+		.then(async (module) => {
+			instance = await WebAssembly.instantiate(module, imports);
+			this.signal.throwIfAborted();
+			for (const symbol of ["jsdata", "jsdatalen"]) {
+				if (!(symbol in instance.exports)) throw Error(`wasm module does not export '${symbol}'`);
+			}
+			const jsdata = instance.exports.jsdata;
+			const jsdataLen = new Uint32Array(instance.exports.memory.buffer, instance.exports.jsdatalen, 4)[0];
 
-				instance.exports._initialize();
-				const name = new Uint8Array(instance.exports.memory.buffer, jsdata, jsdataLen);
-				const { read } = new TextEncoder().encodeInto(input.name + "\0", name);
-				if (read < input.name.length + 1) throw Error("MIDI port name is too long");
-				if (instance.exports.init(jsdata) != 0) throw Error("oscmix init failed");
-				input.addEventListener(
-					"midimessage",
-					(event) => {
-						try {
-							if (event.data[0] != 0xf0 || event.data[event.data.length - 1] != 0xf7) return;
-							if (event.data.length > jsdataLen) {
-								console.warn("dropping long sysex");
-								return;
-							}
-							const sysex = new Uint8Array(instance.exports.memory.buffer, jsdata, event.data.length);
-							sysex.set(event.data);
-							instance.exports.handlesysex(sysex.byteOffset, sysex.byteLength, jsdata);
-						} catch (e) {
-							console.error("Error processing sysex:", e);
-							const unsupportedCodes = ["2304", "2305"];
-							if (
-								currentDevice.deviceName === "Fireface 802" &&
-								unsupportedCodes.some((code) => e.message.includes(code))
-							) {
-								console.warn("Skipping unsupported sysex message");
-							}
-						}
-					},
-					{ signal: this.signal }
-				);
-				const stateHandler = (event) => {
-					if (event.target.state == "disconnected") this.abort();
-				};
-				input.addEventListener("statechange", stateHandler, { signal: this.signal });
-				output.addEventListener("statechange", stateHandler, { signal: this.signal });
-				await Promise.all([input.open(), output.open()]);
-				this.signal.throwIfAborted();
-				const interval = setInterval(instance.exports.handletimer.bind(null, true), 100);
-				this.signal.addEventListener(
-					"abort",
-					() => {
-						clearInterval(interval);
-						input.close();
-						output.close();
-					},
-					{ once: true }
-				);
-			})
-			.catch((error) => {
-				this.abort(error);
-				throw error;
-			});
+			instance.exports._initialize();
+			const name = new Uint8Array(instance.exports.memory.buffer, jsdata, jsdataLen);
+			const { read } = new TextEncoder().encodeInto(input.name + "\0", name);
+			if (read < input.name.length + 1) throw Error("MIDI port name is too long");
+			if (instance.exports.init(jsdata) != 0) throw Error("oscmix init failed");
+			input.addEventListener(
+								   "midimessage",
+								   (event) => {
+									   try {
+										   if (event.data[0] != 0xf0 || event.data[event.data.length - 1] != 0xf7) return;
+										   if (event.data.length > jsdataLen) {
+											   console.warn("dropping long sysex");
+											   return;
+										   }
+										   const sysex = new Uint8Array(instance.exports.memory.buffer, jsdata, event.data.length);
+										   sysex.set(event.data);
+										   instance.exports.handlesysex(sysex.byteOffset, sysex.byteLength, jsdata);
+									   } catch (e) {
+										   console.error("Error processing sysex:", e);
+										   const unsupportedCodes = ["2304", "2305"];
+										   if (
+											   currentDevice.deviceName === "Fireface 802" &&
+											   unsupportedCodes.some((code) => e.message.includes(code))
+											   ) {
+												   console.warn("Skipping unsupported sysex message");
+											   }
+									   }
+								   },
+								   { signal: this.signal }
+								   );
+			const stateHandler = (event) => {
+				if (event.target.state == "disconnected") this.abort();
+			};
+			input.addEventListener("statechange", stateHandler, { signal: this.signal });
+			output.addEventListener("statechange", stateHandler, { signal: this.signal });
+			await Promise.all([input.open(), output.open()]);
+			this.signal.throwIfAborted();
+			const interval = setInterval(instance.exports.handletimer.bind(null, true), 100);
+			this.signal.addEventListener(
+										 "abort",
+										 () => {
+											 clearInterval(interval);
+											 input.close();
+											 output.close();
+										 },
+										 { once: true }
+										 );
+		})
+		.catch((error) => {
+			this.abort(error);
+			throw error;
+		});
 		this.send = (data) => {
 			const osc = new Uint8Array(instance.exports.memory.buffer, instance.exports.jsdata, data.length);
 			osc.set(data);
@@ -480,13 +481,12 @@ class Interface {
 	}
 
 	bind(addr, types, obj, prop, eventType) {
-		this.methods.set(addr, (args) => {
+		this.methods.set(addr, withValueCache((args) => {
 			console.log(`OSC update for ${addr}:`, args);
-
 			const step = obj.step;
 			obj[prop] = step ? Math.round(args[0] / step) * step : args[0];
 			if (eventType) obj.dispatchEvent(new OSCEvent(eventType));
-		});
+		}));
 		if (eventType) {
 			obj.addEventListener(eventType, (event) => {
 				if (!(event instanceof OSCEvent)) this.send(addr, types, [obj[prop]]);
@@ -1099,7 +1099,9 @@ class Channel {
 		if (playCheckbox) {
 			iface.bind(prefix + "/play", ",i", playCheckbox, "checked", "change");
 		}
-
+		if (type === Channel.OUTPUT) {
+			bridge.register(type, index, fragment);
+		}
 		for (const node of fragment.querySelectorAll("[id]")) {
 			if (Channel.#elements.has(node.id)) {
 				const type = node.step && node.step < 1 ? ",f" : ",i";
@@ -1175,6 +1177,7 @@ function handleStatusRequests() {
 }
 
 const iface = new Interface();
+const bridge = new RoomEQBridge(iface);
 
 function setupInterface() {
 	const connectionType = document.getElementById("connection-type");
@@ -1328,15 +1331,15 @@ function setupInterface() {
 		);
 
 		connection.ready
-			.then(() => {
-				iface.connection = connection;
-				icon.textContent = elements["connection-type"].value;
-				icon.dataset.state = "connected";
-				updatePageTitle();
-				iface.send("/refresh", ",", []);
-				updateConnectionStatus(true, true, currentDevice.deviceName);
-			})
-			.catch(console.error);
+		.then(() => {
+			iface.connection = connection;
+			icon.textContent = elements["connection-type"].value;
+			icon.dataset.state = "connected";
+			updatePageTitle();
+			iface.send("/refresh", ",", []);
+			updateConnectionStatus(true, true, currentDevice.deviceName);
+		})
+		.catch(console.error);
 	});
 
 	/* make channels */
