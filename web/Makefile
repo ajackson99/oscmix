@@ -6,6 +6,7 @@ WASM_CC?=clang --target=wasm32-unknown-wasi
 WASM_CFLAGS?=-O2 -Wall -Wpedantic
 WASM_LDFLAGS?=-mexec-model=reactor
 
+
 CC=$(WASM_CC)
 CFLAGS=$(WASM_CFLAGS)
 LDFLAGS=$(WASM_LDFLAGS)
