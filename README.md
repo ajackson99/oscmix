@@ -1,7 +1,5 @@
 [![Build and Release](https://github.com/huddx01/oscmix/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/huddx01/oscmix/actions/workflows/build.yml)
 
-[![Web UI Deployment](https://github.com/huddx01/oscmix/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/huddx01/oscmix/actions/workflows/pages/pages-build-deployment)
-
 ⚠️ Note
 
 You have reached my dev branch which is a fork of https://github.com/michaelforney/oscmix.
