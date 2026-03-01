@@ -274,6 +274,102 @@ jobs:
           name: web-wasm
           path: ${{ env.WEB_ARTIFACT_PATH }}
 
+      - name: Build AppImage (x86_64 Linux only)
+        if: matrix.platform == 'linux' && matrix.arch == 'x86_64'
+        run: |
+          # Extract appimagetool instead of running directly (no FUSE on GH runners)
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          chmod +x appimagetool
+          ./appimagetool --appimage-extract > /dev/null
+          APPIMAGETOOL="$PWD/squashfs-root/AppRun"
+
+          # Create AppDir structure
+          APPDIR="oscmix-gtk.AppDir"
+          mkdir -p "$APPDIR/usr/bin"
+          mkdir -p "$APPDIR/usr/share/oscmix"
+          mkdir -p "$APPDIR/usr/share/applications"
+          mkdir -p "$APPDIR/usr/share/icons/hicolor/scalable/apps"
+
+          # Copy binaries
+          cp oscmix "$APPDIR/usr/bin/"
+          cp alsarawio "$APPDIR/usr/bin/"
+          cp alsaseqio "$APPDIR/usr/bin/"
+          cp gtk/oscmix-gtk "$APPDIR/usr/bin/"
+
+          # Copy GTK resources
+          cp gtk/gschemas.compiled "$APPDIR/usr/share/oscmix/"
+
+          # Copy AppRun launcher script
+          cp gtk/AppRun "$APPDIR/AppRun"
+          chmod +x "$APPDIR/AppRun"
+
+          # Desktop entry (no leading whitespace – AppImage spec requires clean format)
+          cat > "$APPDIR/oscmix-gtk.desktop" <<'EOF'
+          [Desktop Entry]
+          Name=oscmix-gtk
+          Exec=oscmix-gtk
+          Icon=oscmix
+          Type=Application
+          Categories=AudioVideo;Audio;
+          Comment=OSC Mixer UI for RME Fireface devices
+          EOF
+          cp "$APPDIR/oscmix-gtk.desktop" "$APPDIR/usr/share/applications/oscmix-gtk.desktop"
+
+          # Copy icon
+          cp gtk/oscmix.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/oscmix.svg"
+          cp gtk/oscmix.svg "$APPDIR/oscmix.svg"
+
+          # Build AppImage (ARCH must be set explicitly for appimagetool)
+          ARCH=x86_64 "$APPIMAGETOOL" "$APPDIR" "oscmix-gtk-${{ needs.version-info.outputs.artifact_version }}-x86_64.AppImage"
+          echo "APPIMAGE_PATH=oscmix-gtk-${{ needs.version-info.outputs.artifact_version }}-x86_64.AppImage" >> $GITHUB_ENV
+
+      - name: Build AppImage (arm64 Linux only)
+        if: matrix.platform == 'linux' && matrix.arch == 'arm64'
+        run: |
+          # Extract appimagetool instead of running directly (no FUSE on GH runners)
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage" -O appimagetool
+          chmod +x appimagetool
+          ./appimagetool --appimage-extract > /dev/null
+          APPIMAGETOOL="$PWD/squashfs-root/AppRun"
+
+          APPDIR="oscmix-gtk.AppDir"
+          mkdir -p "$APPDIR/usr/bin"
+          mkdir -p "$APPDIR/usr/share/oscmix"
+          mkdir -p "$APPDIR/usr/share/applications"
+          mkdir -p "$APPDIR/usr/share/icons/hicolor/scalable/apps"
+
+          cp oscmix "$APPDIR/usr/bin/"
+          cp alsarawio "$APPDIR/usr/bin/"
+          cp alsaseqio "$APPDIR/usr/bin/"
+          cp gtk/oscmix-gtk "$APPDIR/usr/bin/"
+          cp gtk/gschemas.compiled "$APPDIR/usr/share/oscmix/"
+          cp gtk/AppRun "$APPDIR/AppRun"
+          chmod +x "$APPDIR/AppRun"
+
+          cat > "$APPDIR/oscmix-gtk.desktop" <<'EOF'
+          [Desktop Entry]
+          Name=oscmix-gtk
+          Exec=oscmix-gtk
+          Icon=oscmix
+          Type=Application
+          Categories=AudioVideo;Audio;
+          Comment=OSC Mixer UI for RME Fireface devices
+          EOF
+          cp "$APPDIR/oscmix-gtk.desktop" "$APPDIR/usr/share/applications/oscmix-gtk.desktop"
+
+          cp gtk/oscmix.svg "$APPDIR/usr/share/icons/hicolor/scalable/apps/oscmix.svg"
+          cp gtk/oscmix.svg "$APPDIR/oscmix.svg"
+
+          ARCH=aarch64 "$APPIMAGETOOL" "$APPDIR" "oscmix-gtk-${{ needs.version-info.outputs.artifact_version }}-aarch64.AppImage"
+          echo "APPIMAGE_PATH=oscmix-gtk-${{ needs.version-info.outputs.artifact_version }}-aarch64.AppImage" >> $GITHUB_ENV
+
+      - name: Upload AppImage artifact
+        if: matrix.platform == 'linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.arch }}
+          path: ${{ env.APPIMAGE_PATH }}
+
   commit-wasm-and-deploy:
     runs-on: ubuntu-latest
     needs: [build]
@@ -328,9 +424,7 @@ jobs:
       - name: Sync web/pub into gh-pages
         run: |
           cd gh-pages-repo
-          # Remove all tracked files except .git
           find . -mindepth 1 -not -path './.git*' -delete
-          # web/pub now contains the freshly updated wasm (copied above)
           cp -r ../web/pub/. .
 
       - name: Commit and push to gh-pages
@@ -400,6 +494,7 @@ jobs:
           files: |
             ./artifacts/**/*.tar.gz
             ./artifacts/**/*.sha256
+            ./artifacts/**/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -508,5 +603,6 @@ jobs:
           files: |
             ./artifacts/**/*.tar.gz
             ./artifacts/**/*.sha256
+            ./artifacts/**/*.AppImage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

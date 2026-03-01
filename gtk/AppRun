@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# Resolve AppImage root directory
+APPDIR="$(dirname "$(readlink -f "$0")")"
+OSCMIX="$APPDIR/usr/bin/oscmix"
+ALSARAWIO="$APPDIR/usr/bin/alsarawio"
+ALSASEQIO="$APPDIR/usr/bin/alsaseqio"
+GTK="$APPDIR/usr/bin/oscmix-gtk"
+
+export GSETTINGS_SCHEMA_DIR="$APPDIR/usr/share/oscmix"
+
+# Supported device name patterns (matched against amidi/aconnect output)
+SUPPORTED_DEVICES=(
+    "Fireface UCX II"
+    "Fireface 802"
+    "Fireface UCX"
+    "Fireface UFX+"
+    "Fireface UFX II"
+    "Fireface UFX III"
+)
+
+OSCMIX_PID=""
+IO_PID=""
+
+# ─── Cleanup on exit ────────────────────────────────────────────────────────
+cleanup() {
+    if [ -n "$IO_PID" ] && kill -0 "$IO_PID" 2>/dev/null; then
+        kill "$IO_PID"
+    fi
+    if [ -n "$OSCMIX_PID" ] && kill -0 "$OSCMIX_PID" 2>/dev/null; then
+        kill "$OSCMIX_PID"
+    fi
+}
+trap cleanup EXIT
+
+# ─── Determine io mode (alsarawio or alsaseqio) ─────────────────────────────
+IO_MODE=$(zenity --list \
+    --title="oscmix – MIDI Backend" \
+    --text="Select the MIDI backend to use:" \
+    --radiolist \
+    --column="" --column="Backend" --column="Description" \
+    TRUE "alsaseqio" "ALSA Sequencer API (recommended)" \
+    FALSE  "alsarawio" "Alsa Raw MIDI" \
+    --width=420 --height=250 2>/dev/null)
+
+[ $? -ne 0 ] && exit 0  # User cancelled
+
+# ─── Scan for supported devices ─────────────────────────────────────────────
+declare -a DEVICE_LIST=()
+
+if [ "$IO_MODE" = "alsarawio" ]; then
+    # Parse amidi -l output, find supported devices and their last port
+    while IFS= read -r line; do
+        for dev in "${SUPPORTED_DEVICES[@]}"; do
+            if echo "$line" | grep -q "$dev"; then
+                PORT=$(echo "$line" | awk '{print $2}')
+                NAME=$(echo "$line" | sed 's/.*hw:[0-9,]* *//')
+                DEVICE_LIST+=("$PORT|$NAME")
+            fi
+        done
+    done < <(amidi -l 2>/dev/null | grep -v "^Dir")
+
+    # Keep only last port per device (highest port number for same card)
+    declare -A LAST_PORT
+    for entry in "${DEVICE_LIST[@]}"; do
+        PORT="${entry%%|*}"
+        NAME="${entry##*|}"
+        # Extract card number to group ports by device
+        CARD=$(echo "$PORT" | cut -d, -f1 | tr -d 'hw:')
+        LAST_PORT["$CARD"]="$entry"
+    done
+    DEVICE_LIST=()
+    for entry in "${LAST_PORT[@]}"; do
+        DEVICE_LIST+=("$entry")
+    done
+
+else
+    # Parse aconnect -l output, find supported devices and their last port
+    CURRENT_CLIENT=""
+    CURRENT_NAME=""
+    LAST_PORTNUM=""
+    while IFS= read -r line; do
+        if echo "$line" | grep -q "^client"; then
+            # Save previous device's last port if it was supported
+            if [ -n "$CURRENT_CLIENT" ] && [ -n "$LAST_PORTNUM" ]; then
+                DEVICE_LIST+=("${CURRENT_CLIENT}:${LAST_PORTNUM}|${CURRENT_NAME}")
+            fi
+            CURRENT_CLIENT=""
+            CURRENT_NAME=""
+            LAST_PORTNUM=""
+            for dev in "${SUPPORTED_DEVICES[@]}"; do
+                if echo "$line" | grep -q "$dev"; then
+                    CURRENT_CLIENT=$(echo "$line" | grep -o 'client [0-9]*' | awk '{print $2}')
+                    CURRENT_NAME=$(echo "$line" | sed "s/client [0-9]*: '//;s/' .*//")
+                    break
+                fi
+            done
+        elif [ -n "$CURRENT_CLIENT" ] && echo "$line" | grep -qE "^ +[0-9]+ '"; then
+            LAST_PORTNUM=$(echo "$line" | grep -o '^ *[0-9]*' | tr -d ' ')
+        fi
+    done < <(aconnect -l 2>/dev/null)
+    # Save last device
+    if [ -n "$CURRENT_CLIENT" ] && [ -n "$LAST_PORTNUM" ]; then
+        DEVICE_LIST+=("${CURRENT_CLIENT}:${LAST_PORTNUM}|${CURRENT_NAME}")
+    fi
+fi
+
+# ─── Handle no device found ──────────────────────────────────────────────────
+if [ ${#DEVICE_LIST[@]} -eq 0 ]; then
+    zenity --question \
+        --title="oscmix – No Device Found" \
+        --text="No supported RME device was detected.\n\nDo you want to start the UI anyway (without a connected unit)?" \
+        --ok-label="Start anyway" \
+        --cancel-label="Quit" \
+        --width=380 2>/dev/null
+    if [ $? -ne 0 ]; then
+        exit 0
+    fi
+    # Start GTK without oscmix
+    exec "$GTK"
+fi
+
+# ─── Let user select device if multiple found ────────────────────────────────
+if [ ${#DEVICE_LIST[@]} -eq 1 ]; then
+    SELECTED="${DEVICE_LIST[0]}"
+else
+    # Build zenity list entries
+    ZENITY_ARGS=()
+    for entry in "${DEVICE_LIST[@]}"; do
+        PORT="${entry%%|*}"
+        NAME="${entry##*|}"
+        ZENITY_ARGS+=("$PORT" "$NAME")
+    done
+
+    SELECTED_PORT=$(zenity --list \
+        --title="oscmix – Select Device" \
+        --text="Multiple supported devices found.\nSelect the device to use:" \
+        --column="Port" --column="Device" \
+        "${ZENITY_ARGS[@]}" \
+        --width=500 --height=300 2>/dev/null)
+
+    [ $? -ne 0 ] && exit 0
+
+    # Find full entry for selected port
+    for entry in "${DEVICE_LIST[@]}"; do
+        if [ "${entry%%|*}" = "$SELECTED_PORT" ]; then
+            SELECTED="$entry"
+            break
+        fi
+    done
+fi
+
+DEVICE_PORT="${SELECTED%%|*}"
+DEVICE_NAME="${SELECTED##*|}"
+
+# ─── Handle already running oscmix ───────────────────────────────────────────
+EXISTING_PID=$(pgrep -x oscmix 2>/dev/null | head -1)
+if [ -n "$EXISTING_PID" ]; then
+    zenity --question \
+        --title="oscmix – Already Running" \
+        --text="oscmix is already running (PID $EXISTING_PID).\n\nWhat do you want to do?" \
+        --ok-label="Restart oscmix" \
+        --cancel-label="Use existing" \
+        --width=380 2>/dev/null
+    if [ $? -eq 0 ]; then
+        # Restart: kill existing instance
+        kill "$EXISTING_PID"
+        sleep 0.5
+    else
+        # Use existing – skip launching oscmix/io, just start GTK
+        exec "$GTK"
+    fi
+fi
+
+# ─── Launch oscmix via selected backend ──────────────────────────────────────
+if [ "$IO_MODE" = "alsarawio" ]; then
+    "$ALSARAWIO" "$DEVICE_PORT" "$OSCMIX" &
+    IO_PID=$!
+else
+    "$ALSASEQIO" "$DEVICE_PORT" "$OSCMIX" &
+    IO_PID=$!
+fi
+
+# Give oscmix a moment to initialize
+sleep 0.8
+
+# Verify it actually started
+if ! kill -0 "$IO_PID" 2>/dev/null; then
+    zenity --error \
+        --title="oscmix – Launch Failed" \
+        --text="Failed to start oscmix with device:\n$DEVICE_NAME ($DEVICE_PORT)\n\nPlease check that the device is connected and not in use." \
+        --width=380 2>/dev/null
+    exit 1
+fi
+
+# ─── Launch GTK UI (blocking – cleanup runs on exit via trap) ────────────────
+"$GTK"
