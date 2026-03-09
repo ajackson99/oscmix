@@ -1637,8 +1637,28 @@ function reinitializeUI() {
 		}
 	}
 	populateDeviceSpecificOptions();
+	applyDeviceFeatures();
 
 	console.log("UI reinitialized for device: ", currentDevice.deviceName);
+}
+
+function applyDeviceFeatures() {
+	// Show/hide sections based on device capability flags
+	const hasDurec  = currentDevice?.hasDurec  ?? false;
+	const hasRoomEq = currentDevice?.hasRoomEq ?? false;
+
+	// DURec section (details element containing durec-file select)
+	const durecSection = document.querySelector('details:has(#durec-file)');
+	if (durecSection) {
+		durecSection.hidden = !hasDurec;
+		const hr = durecSection.previousElementSibling;
+		if (hr?.tagName === 'HR') hr.hidden = !hasDurec;
+	}
+
+	// Room EQ buttons and crossfeed selects in channel strips
+	for (const el of document.querySelectorAll('[id="roomeq-show"], [id="crossfeed"]')) {
+		el.hidden = !hasRoomEq;
+	}
 }
 
 function populateDeviceSpecificOptions() {
@@ -1666,6 +1686,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	setupInterface();
 	iface.initDurec();
 	setTimeout(populateDeviceSpecificOptions, 100);
+	applyDeviceFeatures();
 	loadDebugFlags();
 	setupDebugListeners();
 });

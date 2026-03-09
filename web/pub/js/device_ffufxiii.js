@@ -11,6 +11,8 @@ const dig = (name) => ({ name, flags: [], gain: null, reflevel: null });
 export const device_ffufxiii = {
 	deviceName: 'Fireface UFX III',
 	midiPortNames: ['Port R', 'Port 4', ':3'],
+	hasDurec:  true,
+	hasRoomEq: true,
 
 	inputs: [
 		{ name: 'Analog 1', flags: ['gain', 'reflevel'], gain: { min: 0, max: 12 }, reflevel: RL_INPUT },

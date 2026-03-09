@@ -9,6 +9,8 @@ const dig = (name) => ({ name, flags: [], gain: null, reflevel: null });
 export const device_ff802 = {
 	deviceName: 'Fireface 802',
 	midiPortNames: ['Port 2'],
+	hasDurec:  false,
+	hasRoomEq: false,
 
 	inputs: [
 		{ name: 'Analog 1', flags: ['gain', 'reflevel'], gain: { min: 0, max: 12 }, reflevel: RL_INPUT },
