@@ -729,15 +729,21 @@ class Channel {
 		const view = document.forms.view.elements;
 		const gainTarget = fragment.querySelector('label[data-flags="gain"] .knob-target');
 		if (gainTarget) {
+			// Read gain range from the per-channel device definition
+			const chDefGain = type === Channel.INPUT
+				? currentDevice.inputs[index]
+				: currentDevice.outputs[index];
+			const gainMin = chDefGain?.gain?.min ?? 0;
+			const gainMax = chDefGain?.gain?.max ?? 75;
 			const gainKnob = new Knob({
 				id: `gain-${type}-${index}`,
-				min: 0,
-				max: 75,
-				value: 0,
+				min: gainMin,
+				max: gainMax,
+				value: gainMin,
 				unit: "dB",
 				size: 25,
 				step: 0.5,
-				resetValue: 0,
+				resetValue: gainMin,
 				sendDuringDrag: true,
 				sendInterval: 150,
 				borderColor: "#000000ab",
@@ -831,19 +837,36 @@ class Channel {
 
 		let defName;
 		const prefix = `/${type}/${index + 1}`;
-		const flags = currentDevice.getFlags(type, index);
+
+		// Resolve per-channel definition and build flags list
+		let chInfo = null;
+		if (type === Channel.INPUT)  chInfo = currentDevice.inputs[index];
+		if (type === Channel.OUTPUT) chInfo = currentDevice.outputs[index];
+		const flags = [...(chInfo?.flags ?? [])];
+
+		// Populate reflevel <select> options dynamically from device def
+		if (chInfo?.reflevel) {
+			const reflevelSelect = fragment.getElementById('reflevel');
+			if (reflevelSelect) {
+				reflevelSelect.innerHTML = '';
+				for (const label of chInfo.reflevel) {
+					reflevelSelect.appendChild(new Option(label));
+				}
+			}
+		}
+
 		switch (type) {
 			case Channel.INPUT:
 				flags.push("input");
-				defName = currentDevice.inputNames[index];
+				defName = currentDevice.inputs[index]?.name ?? currentDevice.inputNames[index];
 				break;
 			case Channel.PLAYBACK:
 				flags.push("playback");
-				defName = currentDevice.outputNames[index];
+				defName = currentDevice.outputs[index]?.name ?? currentDevice.outputNames[index];
 				break;
 			case Channel.OUTPUT:
 				flags.push("output");
-				defName = currentDevice.outputNames[index];
+				defName = currentDevice.outputs[index]?.name ?? currentDevice.outputNames[index];
 
 				const selects = document.querySelectorAll("select.channel-volume-output");
 				for (const select of selects) {
