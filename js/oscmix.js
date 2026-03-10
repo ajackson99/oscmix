@@ -1130,8 +1130,8 @@ class Channel {
 		if (!(currentDevice?.hasRoomEq ?? true)) {
 			const roomeqBtn = fragment.getElementById('roomeq-show');
 			if (roomeqBtn) roomeqBtn.hidden = true;
-			const crossfeedLabel = fragment.querySelector('label:has(#crossfeed)');
-			if (crossfeedLabel) crossfeedLabel.hidden = true;
+			const crossfeedSelect = fragment.getElementById('crossfeed');
+			if (crossfeedSelect) crossfeedSelect.closest('label').hidden = true;
 		}
 		for (const node of fragment.querySelectorAll("[id]")) {
 			if (Channel.#elements.has(node.id)) {

@@ -9,9 +9,9 @@
 		<link rel="stylesheet" href="css/help.css" media="print" onload="this.media='all'" />
 		<link rel="stylesheet" href="css/knob.css" />
 
-		<link rel="preload" href="js/oscmix.js" as="script" />
-		<link rel="preload" href="js/param.js" as="script" />
-		<link rel="preload" href="js/help.js" as="script" />
+		<link rel="modulepreload" href="js/oscmix.js" />
+		<link rel="modulepreload" href="js/param.js" />
+		<link rel="modulepreload" href="js/help.js" />
 	</head>
 	<body>
 		<template id="channel-template">
@@ -291,6 +291,7 @@
 				</form>
 			</details>
 			<hr />
+		
 
 			<details open>
 				<summary>
