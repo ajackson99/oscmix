@@ -1654,14 +1654,29 @@ function applyDeviceFeatures() {
 	// Show/hide static sections based on device capability flags.
 	// Channel-level elements (roomeq-show, crossfeed) are handled
 	// directly in the Channel constructor while IDs are still present.
-	const hasDurec = currentDevice?.hasDurec ?? false;
+	const hasDurec  = currentDevice?.hasDurec  ?? false;
+	const hasHwKeys = currentDevice?.hasHwKeys ?? true;
+	const hasHwLcd  = currentDevice?.hasHwLcd  ?? true;
 
+	// DURec section
 	const durecSection = document.querySelector('details:has(#durec-file)');
 	if (durecSection) {
 		durecSection.hidden = !hasDurec;
 		const hr = durecSection.previousElementSibling;
 		if (hr?.tagName === 'HR') hr.hidden = !hasDurec;
 	}
+
+	// Keys section
+	const keysSection = document.querySelector('details:has(#hardware-lockkeys)');
+	if (keysSection) {
+		keysSection.hidden = !hasHwKeys;
+		const hr = keysSection.previousElementSibling;
+		if (hr?.tagName === 'HR') hr.hidden = !hasHwKeys;
+	}
+
+	// LCD Contrast label
+	const lcdLabel = document.querySelector('label:has(#hardware-lcdcontrast)');
+	if (lcdLabel) lcdLabel.hidden = !hasHwLcd;
 }
 
 function populateDeviceSpecificOptions() {

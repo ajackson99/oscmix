@@ -13,7 +13,9 @@ export const device_ffufxp = {
 	midiPortNames: ['Port 4'],
 	hasDurec:  true,
 	hasRoomEq: true,
-
+	hasHwKeys: true,
+	hasHwLcd:  true,
+	
 	inputs: [
 		{ name: 'Analog 1', flags: ['gain', 'reflevel'], gain: { min: 0, max: 12 }, reflevel: RL_INPUT },
 		{ name: 'Analog 2', flags: ['gain', 'reflevel'], gain: { min: 0, max: 12 }, reflevel: RL_INPUT },

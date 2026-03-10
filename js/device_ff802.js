@@ -11,6 +11,8 @@ export const device_ff802 = {
 	midiPortNames: ['Port 2'],
 	hasDurec:  false,
 	hasRoomEq: false,
+	hasHwKeys: false,
+	hasHwLcd:  false,
 
 	inputs: [
 		{ name: 'Analog 1', flags: ['gain', 'reflevel'], gain: { min: 0, max: 12 }, reflevel: RL_INPUT },

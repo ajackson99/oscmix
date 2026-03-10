@@ -12,6 +12,8 @@ export const device_ffucxii = {
 	midiPortNames: ['Port 2'],
 	hasDurec:  true,
 	hasRoomEq: true,
+	hasHwKeys: true,
+	hasHwLcd:  true,
 
 	inputs: [
 		{ name: 'Mic/Line 1', flags: ['gain', '48v', 'autoset'], gain: { min: 0, max: 75 }, reflevel: null },

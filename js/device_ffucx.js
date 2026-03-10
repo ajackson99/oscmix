@@ -8,9 +8,11 @@ const dig = (name) => ({ name, flags: [], gain: null, reflevel: null });
 
 export const device_ffucx = {
 	deviceName: 'Fireface UCX',
-	midiPortNames: ['Port 1'],
+	midiPortNames: ['Port 3'],
 	hasDurec:  false,
 	hasRoomEq: false,
+	hasHwKeys: false,
+	hasHwLcd:  false,
 
 	inputs: [
 		{ name: 'Mic 1', flags: ['gain', '48v', 'autoset'], gain: { min: 0, max: 65 }, reflevel: null },
