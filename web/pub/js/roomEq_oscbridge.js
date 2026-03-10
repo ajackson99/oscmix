@@ -105,7 +105,7 @@ export class RoomEQBridge {
     }
 
     const url = `roomEq.html?channel=${encodeURIComponent(channelKey)}`;
-    const features = 'width=1150,height=560,resizable=yes,scrollbars=no';
+    const features = 'width=1190,height=700,resizable=yes,scrollbars=no';
     const popup = window.open(url, `roomEq_${channelKey}`, features);
     entry.popup = popup;
 
