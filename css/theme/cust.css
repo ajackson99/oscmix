@@ -25,6 +25,9 @@ fieldset {
 fieldset > label {
 	display: contents;
 }
+fieldset > label[hidden] {
+	display: none;
+}
 fieldset span:has(input[type="checkbox"]) {
 	text-align: right;
 }
