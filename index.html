@@ -4,6 +4,7 @@
 		<title>oscmix Generic</title>
 		<link rel="preload" href="css/theme/tm_dark_hi.css" as="style" />
 		<link rel="stylesheet" href="css/theme/tm_dark_hi.css" />
+		<link rel="stylesheet" href="css/base.css" />
 
 		<link rel="preload" href="css/help.css" as="style" />
 		<link rel="stylesheet" href="css/help.css" media="print" onload="this.media='all'" />
@@ -210,8 +211,8 @@
 									<option>12 dB/oct</option>
 									<option>18 dB/oct</option>
 									<option>24 dB/oct</option>
-								</select></label
-							>
+								</select>
+					</label>
 							<label>Freq.<input id="lowcut/freq" type="number" min="20" max="500" /></label>
 						</fieldset>
 					</details>
@@ -266,21 +267,25 @@
 			<div id="outputs" class="channel-strip"></div>
 		</div>
 		<div id="sidebar">
-			<details open>
+				<details open>
 				<summary>Connection<span id="connection-icon"></span></summary>
 				<form id="connection">
-					<fieldset>
-						<label
-							>Type<select id="connection-type">
+					<fieldset class="custom-form">
+						<label class="form-row">Type
+							<select id="connection-type">
 								<option id="connection-type-websocket" selected>WebSocket</option>
 								<option id="connection-type-midi">MIDI</option>
 							</select>
 						</label>
-						<label class="connection-midi">MIDI Input<select id="connection-midi-input"></select></label>
-						<label class="connection-midi">MIDI Output<select id="connection-midi-output"></select></label>
-						<label class="connection-websocket"
-							>Server<input id="connection-websocket-address" size="1" value="ws://localhost:8222"
-							/></label>
+						<label class="connection-midi form-row">MIDI Input
+							<select id="connection-midi-input"></select>
+						</label>
+						<label class="connection-midi form-row">MIDI Output
+							<select id="connection-midi-output"></select>
+						</label>
+						<label class="connection-websocket form-row">Server
+							<input id="connection-websocket-address" size="1" value="ws://localhost:8222" />
+						</label>
 					</fieldset>
 					<fieldset>
 						<button id="connection-connect">Connect</button>
@@ -314,9 +319,14 @@
 					</fieldset>
 				</form>
 			</details>
-
+			<hr />
 			<details>
-				<summary>Reverb<input id="reverb-enabled" type="checkbox" /></summary>
+				<summary>Reverb
+					<label class="switch">
+						<input id="reverb-enabled" type="checkbox" />
+						<span class="slider"></span>
+					</label>
+				</summary>
 				<fieldset>
 					<label>Type
                         <select id="reverb-type">
@@ -351,9 +361,14 @@
 					<label>Width<input id="reverb-width" type="number" min="0" max="1" step="0.01" /></label>
 				</fieldset>
 			</details>
-	
+			<hr />	
 			<details>
-				<summary>Echo<input id="echo-enabled" type="checkbox" /></summary>
+				<summary>Echo
+					<label class="switch">
+						<input id="echo-enabled" type="checkbox" />
+						<span class="slider"></span>
+					</label>
+				</summary>
 				<fieldset>
 					<label>Type
                         <select id="echo-type">
@@ -381,19 +396,25 @@
 			<details open>
 				<summary>Mixer View</summary>
 				<form id="view">
-					<fieldset>
-						<label
-							>Routing Mode<select id="routing-mode" name="routingmode">
+					<fieldset class="custom-form">
+						<label class="form-row">Routing Mode
+							<select id="routing-mode" name="routingmode">
 								<option value="submix">Submix</option>
 								<option value="free">Free</option>
-							</select></label
-						>
-						<label
-							>Level Meter FX<span><input id="meter-fx" name="meterfx" type="checkbox" /></span
-							></label>
-						<label
-							>Level Meter RMS<span><input id="meter-rms" name="meterrms" type="checkbox" /></span
-							></label>
+							</select>
+						</label>
+						<label class="form-row">Level Meter FX
+							<div class="switch">
+								<input id="meter-fx" name="meterfx" type="checkbox" />
+								<span class="slider"></span>
+							</div>
+						</label>
+						<label class="form-row">Level Meter RMS
+							<div class="switch">
+								<input id="meter-rms" name="meterrms" type="checkbox" />
+								<span class="slider"></span>
+							</div>
+						</label>
 					</fieldset>
 				</form>
 			</details>
@@ -401,9 +422,9 @@
 
 			<details open>
 				<summary>Control Room</summary>
-				<fieldset>
-					<label
-						>Main Out<select id="controlroom-mainout">
+				<fieldset class="custom-form">
+					<label class="form-row">Main Out
+						<select id="controlroom-mainout">
 							<option>Analog 1/2</option>
 							<option>Analog 3/4</option>
 							<option>Analog 5/6</option>
@@ -419,50 +440,40 @@
 							<option>ADAT 11/12</option>
 							<option>ADAT 13/14</option>
 							<option>ADAT 15/16</option>
-						</select></label
-					>
-					<label
-						>Main Mono<span><input id="controlroom-mainmono" type="checkbox" /></span
-						></label>
-					<label
-						>Dim Reduction<input
-						id="controlroom-dimreduction"
-						type="number"
-						min="-65"
-						max="0"
-						step="0.1"
-						value="-20"
-						/></label>
-					<label>Dim
-					    <span>
-					        <input id="controlroom-dim" type="checkbox" />
-					     </span>
+						</select>
 					</label>
-					<label
-						>Recall Volume<input
-						id="controlroom-recallvolume"
-						type="number"
-						min="-65"
-						max="0"
-						step="0.1"
-						value="-10"
-						/></label>
+					<label class="form-row">Main Mono
+						<div class="switch">
+							<input id="controlroom-mainmono" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">Dim Reduction
+						<input id="controlroom-dimreduction" type="number" min="-65" max="0" step="0.1" value="-20" />
+					</label>
+					<label class="form-row">Dim
+						<div class="switch">
+							<input id="controlroom-dim" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">Recall Volume
+						<input id="controlroom-recallvolume" type="number" min="-65" max="0" step="0.1" value="-10" />
+					</label>
 				</fieldset>
 			</details>
 			<hr />
 			<details>
 				<summary>DURec</summary>
-				<fieldset>
-					<label
-						>File:
+				<fieldset class="custom-form">
+					<label class="form-row">File:
 						<select id="durec-file">
 							<option value="-1">New Recording...</option>
 						</select>
 					</label>
 					<label>Samplerate: <output id="durec-samplerate">---</output></label>
 					<label>Channels: <output id="durec-channels">--</output></label>
-					<label
-						>Time:
+					<label class="form-row">Time:
 						<input type="range" id="durec-time" min="0" max="0" step="1" />
 					</label>
 					<output id="durec-time-display">00:00:00</output>
@@ -477,18 +488,18 @@
 			<hr />
 			<details open>
 				<summary>Hardware</summary>
-				<fieldset>
-					<label>LCD Contrast
+				<fieldset class="custom-form">
+					<label class="form-row">LCD Contrast
 						<input
 						type="range"
 						id="hardware-lcdcontrast"
-						orient="vertical"
+						orient="horizontal"
 						min="-20"
 						max="20"
 						step="1"
 						value="0" />
 					</label>
-					<label>Clock Source
+					<label class="form-row">Clock Source
 						<select id="clock-source">
 							<option>Internal</option>
 							<option>Word Clock</option>
@@ -499,48 +510,63 @@
 							<option>MADI Coax.</option>
 						</select>
 					</label>
-					<label>Sample Rate<output id="clock-samplerate"></output></label>
-					<label>Wck. Out<span><input id="clock-wckout" type="checkbox" /></span></label>
-					<label>Wck. Single<span><input id="clock-wcksingle" type="checkbox" /></span></label>
-					<label>Wck. Term.<span><input id="clock-wckterm" type="checkbox" /></span></label>
-					<label>AES In
+					<label class="form-row">Sample Rate<output id="clock-samplerate"></output></label>
+					<label class="form-row">Wck. Out
+						<div class="switch">
+							<input id="clock-wckout" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">Wck. Single
+						<div class="switch">
+							<input id="clock-wcksingle" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">Wck. Term.
+						<div class="switch">
+							<input id="clock-wckterm" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">AES In
 						<select id="hardware-aesin">
 							<option>XLR</option>
 							<option>Opt. 2</option>
 						</select>
 					</label>
-					<label>AES State Pro<select id="hardware-spdifout">
+					<label class="form-row">AES State Pro
+						<select id="hardware-spdifout">
 							<option>Consumer</option>
 							<option>Professional</option>
 						</select></label>
-					<label
-						>Opt. 1 In<select id="hardware-opticalin">
+					<label class="form-row">Opt. 1 In
+						<select id="hardware-opticalin">
 							<option>ADAT</option>
 							<option>S/PDIF</option>
-						</select></label
-					>
-					<label
-						>Opt. 1 Out<select id="hardware-opticalout">
+						</select>
+					</label>
+					<label class="form-row">Opt. 1 Out
+						<select id="hardware-opticalout">
 							<option>ADAT</option>
 							<option>S/PDIF</option>
-						</select></label
-					>
-					<label
-						>Opt. 2 In<select id="hardware-opticalin2">
-							<option>ADAT</option>
-							<option>S/PDIF</option>
-							<option>AES</option>
-						</select></label
-					>
-					<label
-						>Opt. 2 Out<select id="hardware-opticalout2">
+						</select>
+					</label>
+					<label class="form-row">Opt. 2 In
+						<select id="hardware-opticalin2">
 							<option>ADAT</option>
 							<option>S/PDIF</option>
 							<option>AES</option>
-						</select></label
-					>
-					<label
-						>MADI In
+						</select>
+					</label>
+					<label class="form-row">Opt. 2 Out
+						<select id="hardware-opticalout2">
+							<option>ADAT</option>
+							<option>S/PDIF</option>
+							<option>AES</option>
+						</select>
+					</label>
+					<label class="form-row">MADI In
 						<select id="hardware-madiinput">
 							<option>Optical</option>
 							<option>Coaxial</option>
@@ -548,88 +574,86 @@
 							<option>Split</option>
 						</select>
 					</label>
-					<label
-						>MADI Out
+					<label class="form-row">MADI Out
 						<select id="hardware-madioutput">
 							<option>Optical</option>
 							<option>Mirror</option>
 							<option>Split</option>
 						</select>
 					</label>
-					<label
-						>MADI Frame
+					<label class="form-row">MADI Frame
 						<select id="hardware-madiframe">
 							<option>96K Frame</option>
 							<option>48K Frame</option>
 						</select>
 					</label>
-					<label
-						>MADI Format
+					<label class="form-row">MADI Format
 						<select id="hardware-madiformat">
 							<option>56 (28) ch</option>
 							<option>64 (32 ch)</option>
 						</select>
 					</label>
-					<label
-						>Record EQ+D<span><input id="hardware-eqdrecord" type="checkbox" /></span
-						></label>
-					<label
-						>DSP Available
+					<label class="form-row">Record EQ+D
+						<div class="switch">
+							<input id="hardware-eqdrecord" type="checkbox" />
+							<span class="slider"></span>
+						</div>
+					</label>
+					<label class="form-row">DSP Available
 						<output id="hardware-dspavail"></output>
 					</label>
-					<label
-						>DSP Status
+					<label class="form-row">DSP Status
 						<output id="hardware-dspstatus"></output>
 					</label>
-					<label
-						>CC Mode<select id="hardware-ccmode">
+					<label class="form-row">CC Mode
+						<select id="hardware-ccmode">
 							<option>Off</option>
 							<option>On</option>
-						</select></label
-					>
-					<label
-						>Interface Mode<select id="hardware-interfacemode">
+						</select>
+					</label>
+					<label class="form-row">Interface Mode
+						<select id="hardware-interfacemode">
 							<option>Auto</option>
 							<option>USB2</option>
 							<option>USB3</option>
 							<option>CC</option>
-						</select></label
-					>
-					<label
-						>CC Mix<select id="hardware-ccmix">
+						</select>
+					</label>
+					<label class="form-row">CC Mix
+						<select id="hardware-ccmix">
 							<option>TotalMix</option>
 							<option>6 ch. + phones</option>
 							<option>8 ch.</option>
 							<option>20 ch.</option>
-						</select></label
-					>
+						</select>
+					</label>
 
-					<label
-						>CC Routing<select id="hardware-ccrouting">
+					<label class="form-row">CC Routing
+						<select id="hardware-ccrouting">
 							<option>All Ch.</option>
 							<option>Phones</option>
-						</select></label
-					>
-					<label
-						>Standalone MIDI<select id="hardware-standalonemidi">
+						</select>
+					</label>
+					<label class="form-row">Standalone MIDI
+						<select id="hardware-standalonemidi">
 							<option>Off</option>
 							<option>MIDI 1</option>
 							<option>MIDI 2</option>
-						</select></label
-					>
-					<label
-						>Standalone ARC<select id="hardware-standalonearc">
+						</select>
+					</label>
+					<label class="form-row">Standalone ARC
+						<select id="hardware-standalonearc">
 							<option>Volume</option>
 							<option>1s Op</option>
 							<option>Normal</option>
-						</select></label
-					>
+						</select>
+					</label>
 				</fieldset>
 			</details>
 			<hr />
 			<details>
 				<summary>Keys</summary>
-				<fieldset>
+				<fieldset class="custom-form">
 					<label>Lock Keys
 						<select id="hardware-lockkeys">
 							<option>Off</option>
@@ -637,10 +661,11 @@
 							<option>All</option>
 						</select>
 					</label>
-					<label>Remap Keys
-					    <span>
-					        <input id="hardware-remapkeys" type="checkbox" />
-					    </span>
+					<label class="form-row">Remap Keys
+						<div class="switch">
+							<input id="hardware-remapkeys" type="checkbox" />
+							<span class="slider"></span>
+						</div>
 					</label>
 					<label>MIC / GAIN
 						<select id="hardware-programkey01"></select>
@@ -661,29 +686,23 @@
 				<summary>Setups</summary>
 				<form id="setup" title="Setup Slots">
 					<div class="controlroom-button-group">
-						<fieldset>
-							<label class="toggle-button" title="Setup 1"
-								>Setup 1
+						<fieldset class="custom-form">
+							<label class="toggle-button form-row" title="Setup 1">Setup 1
 								<input type="radio" name="setup-slot" value="0" class="setup-slot" />
 							</label>
-							<label class="toggle-button" title="Setup 2"
-								>Setup 2
+							<label class="toggle-button form-row" title="Setup 2">Setup 2
 								<input type="radio" name="setup-slot" value="1" class="setup-slot" />
 							</label>
-							<label class="toggle-button" title="Setup 3"
-								>Setup 3
+							<label class="toggle-button form-row" title="Setup 3">Setup 3
 								<input type="radio" name="setup-slot" value="2" class="setup-slot" />
 							</label>
-							<label class="toggle-button" title="Setup 4"
-								>Setup 4
+							<label class="toggle-button form-row" title="Setup 4">Setup 4
 								<input type="radio" name="setup-slot" value="3" class="setup-slot" />
 							</label>
-							<label class="toggle-button" title="Setup 5"
-								>Setup 5
+							<label class="toggle-button form-row" title="Setup 5">Setup 5
 								<input type="radio" name="setup-slot" value="4" class="setup-slot" />
 							</label>
-							<label class="toggle-button" title="Setup 6"
-								>Setup 6
+							<label class="toggle-button form-row" title="Setup 6">Setup 6
 								<input type="radio" name="setup-slot" value="5" class="setup-slot" />
 							</label>
 						</fieldset>
@@ -705,8 +724,8 @@
 			<hr />
 			<details>
 				<summary>ARC USB</summary>
-				<fieldset>
-					<label title="Open ARC USB Control Window">ARC Control
+				<fieldset class="custom-form">
+					<label class="form-row" title="Open ARC USB Control Window">ARC Control
 						<button id="open-arc-control">Open ARC</button>
 					</label>
 				</fieldset>
@@ -714,8 +733,8 @@
 			<hr />
 				<details>
 				<summary>UI Settings</summary>
-				<fieldset>
-					<label title="Shows Help for URL Parameters">Help:
+				<fieldset class="custom-form">
+					<label class="form-row" title="Shows Help for URL Parameters">Help:
 						<button class="help-button" id="url-help-button">Open</button>
 					</label>
 				</fieldset>
@@ -723,9 +742,10 @@
 					<fieldset>
 						<label title="Select your preferred UI Theme">Theme:
 							<select id="ui-style-select">
-								<option value="css/theme/tm_dark_hi.css">TM dark (High Contrast)</option>
-								<option value="css/theme/tm_dark.css">TM dark</option>
-								<option value="css/theme/tm_light.css">TM light</option>
+								<option value="css/theme/tm_dark_hi.css">TM Dark (High Contrast)</option>
+								<option value="css/theme/tm_dark.css">TM Dark</option>
+								<option value="css/theme/tm_light.css">TM Light</option>
+								<option value="css/theme/led_light.css">LED Light</option>
 								<option value="css/theme/default.css">Minimal</option>
 								<option value="css/theme/cust.css">Custom</option>
 							</select>

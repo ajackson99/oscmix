@@ -59,6 +59,11 @@
 	--fx-ring-red: #ff0000;
 	--fx-center-bg: #444;
 	--fx-center-border: #00ffa1;
+
+	/* Switch widget colors */
+	--switch-off-color: #ccc;
+	--switch-on-color: #5555DD;
+	--switch-thumb-color: white;
 }
 
 * {

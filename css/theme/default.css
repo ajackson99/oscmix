@@ -1,4 +1,11 @@
 
+:root {
+	/* Switch widget colors */
+	--switch-off-color: #ccc;
+	--switch-on-color: #5555DD;
+	--switch-thumb-color: white;
+}
+
 * {
 	font-family: sans-serif;
 }

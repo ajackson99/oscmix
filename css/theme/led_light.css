@@ -1,19 +1,20 @@
 :root {
+
 	/* Dimensions */
 	--channel-width: 90px;
 	--sidebar-width: 19em;
-
+	
 	/* Base Colors */
-	--background-color: #1E2328;
-	--background-sidebar-color: #1E2328;
-	--background-submix-color: #47525C;
-	--text-color: #b3c2cb;
-	--text-highlight-color: #ffffff;
-	--border-color: gray;
-	--border-highlight-color: lightgray;
+	--background-color: rgba(239, 239, 239, 0.8);
+	--background-sidebar-color: #ffffff;
+	--background-submix-color: rgb(195, 195, 195);
+	--text-color: rgba(87, 87, 87, 0.95);
+	--text-highlight-color: white;
+	--border-color: #444444;
+	--border-highlight-color: #3f3f3f;
 
 	/* Base Toggle-Button colors */
-	--toggle-hover-color: #606a6f;
+	--toggle-hover-color: #dadbdc;
 	--toggle-active-color: #f8f8f8;
 	--toggle-checked-color: #ccc;
 
@@ -35,16 +36,16 @@
 	--load-color: rgba(0, 248, 0, 0.53);
 	--load-highlight-color: #00f800;
 	--load-highlight-color-shadow: rgb(255 0 0 / 82%);
-
+	
 	/* Meter-colors */
-	--meter-red: #f33628;
-	--meter-orange: #ff8100;
-	--meter-yellow: #d1f000;
-	--meter-green: #03ff00;
-	--meter-bg-color: #222;
+	--meter-red: #ff0000;
+	--meter-orange: #ffAA33;
+	--meter-yellow: #FFFF00;
+	--meter-green: #77DD77;
+	--meter-bg-color: #444444;
 
 	/* EQ-colors */
-	--eq-plot-bg: linear-gradient(to right, #400000, #004000, #000040);
+	--eq-plot-bg: linear-gradient(to right, #6b0202c7, #004000b8, #000040bf);
 
 	/* Knob-colors */
 	--knob-bg-color: #555;
@@ -60,9 +61,9 @@
 	--fx-center-border: #00ffa1;
 
 	/* Switch widget colors */
-	--switch-off-color: #555;
-	--switch-on-color: #5588FF;
-	--switch-thumb-color: #ddd;
+	--switch-off-color: #ccc;
+	--switch-on-color: #5555DD;
+	--switch-thumb-color: white;
 }
 
 * {
@@ -85,6 +86,10 @@ html, body {
 summary {
 	font-weight: bold;
 	overflow: hidden;
+	display: flex;
+    align-items: center;
+    justify-content: space-between;
+
 }
 
 summary > input {
@@ -101,23 +106,24 @@ fieldset {
 fieldset > label {
 	display: contents;
 }
-fieldset > label[hidden] {
-	display: none;
-}
 
 fieldset span:has(input[type="checkbox"]) {
 	text-align: right;
 }
 
-fieldset output {
+fieldset select {
 	border: 1px solid var(--border-color);
 	border-radius: 2px;
+	display: inline-block;
+    min-height: 1.1em;
+    width: 100%;
 }
 
-output {
+
+/*output {
 	font-size: smaller;
 	padding: 2px;
-}
+}*/
 
 .toggle-button {
 	font-size: small;
@@ -176,6 +182,11 @@ output {
 	color: var(--text-highlight-color);
 }
 
+.toggle-button.load-button:has(> .load-checkbox:checked) {
+	background-color: greenyellow;
+	color: var(--text-highlight-color);
+}
+
 /* Highlight if Global Mute/Solo enabled */
 body.global-mute-enabled .toggle-button.mute-button:has(> .mute-checkbox:checked) {
 	background-color: var(--mute-highlight-color) !important;
@@ -187,21 +198,30 @@ body.global-solo-enabled .toggle-button.solo-button:has(> .solo-checkbox:checked
 	box-shadow: 0 0 8px 2px var(--solo-highlight-color-shadow);
 }
 
+
+hr {
+  height: 3px;         
+  background-color: #AAAAAA; 
+  border: none;
+  border-radius: 2px;
+}
+
 #sidebar {
 	background-color: var(--background-sidebar-color);
 	border-left: 1px solid var(--border-color);
 	overflow-y: auto;
-	padding: 4px 0 4px 4px;
-	flex: 0 0 var(--sidebar-width);
+	padding: 6px;
+	flex: 0 0 17em;
 }
 
 #sidebar > details > :not(:first-child) {
 	padding: 4px;
+
 }
 
 #sidebar fieldset {
 	row-gap: 4px;
-	padding: 4px;
+	padding: 10px;
 	margin: 0;
 }
 
@@ -223,9 +243,9 @@ body.global-solo-enabled .toggle-button.solo-button:has(> .solo-checkbox:checked
 	content: "\274C";
 }
 
-label:has(#connection-type:not([data-value="MIDI"])) ~ .connection-midi {
+/*label:has(#connection-type:not([data-value="MIDI"])) ~ .connection-midi {
 	display: none;
-}
+}*/
 
 label:has(#connection-type:not([data-value="WebSocket"])) ~ .connection-websocket {
 	display: none;
@@ -428,7 +448,7 @@ input[type=range]:focus {
 }
 
 .channel-volume meter::-webkit-meter-optimum-value {
-	transition: 0.1s inline-size;
+	transition: 0.3s inline-size;
 	background: linear-gradient(to top,
 	var(--meter-green) 0%,
 	var(--meter-yellow) 65%,
@@ -513,10 +533,8 @@ input[type=range]:focus {
 }
 
 .channel:has(~ .channel-panel-eq :is(.eq, .lowcut):checked) .channel-show-eq-label,
-.channel:has(~ .channel-panel-dynamics :is(.dynamics, .autolevel):checked) .channel-show-dynamics-label,
-.channel:has(~ .channel-panel-settings :is(.roomeq, .loopback, .crossfeed):checked) .channel-show-settings-label
-{
-	box-shadow: inset 0 0 1.5em selecteditem;
+.channel:has(~ .channel-panel-dynamics :is(.dynamics, .autolevel):checked) .channel-show-dynamics-label {
+	box-shadow: inset 0 0 0.5em selecteditem;
 }
 
 .channel-panel-settings:has(.stereo:not(:checked)) .stereo-field {
@@ -714,11 +732,22 @@ osc-knob::after {
 	border-radius: 4px;
 	overflow: hidden;
 	margin: 2px 4px;
-	background: linear-gradient(to top,
-	var(--meter-green) 0%,
-	var(--meter-yellow) 70%,
-	var(--meter-orange) 80%,
-	var(--meter-red) 100%);
+	background: repeating-linear-gradient(to bottom,
+       #444 0px,
+       #444 1px,      /* Grosor de la separación negra */
+       transparent 1px,
+       transparent 5px /* Tamaño del LED (total 6px de paso) */
+    ),
+    linear-gradient(to top,
+	    var(--meter-green) 0%,
+	    var(--meter-green) 65%,
+	    var(--meter-yellow) 65%,
+	    var(--meter-yellow) 83%,
+	    var(--meter-orange) 83%,	    
+	    var(--meter-orange) 89%,	    
+	    var(--meter-red) 89%,
+	    var(--meter-red) 100%
+	);
 	position: relative;
 }
 
@@ -796,7 +825,7 @@ osc-knob::after {
 	color: #ccc;
 }
 
-
+/*
 .controlroom-button-group {
 	display: flex;
 	grid-column: 1 / -1;
@@ -810,7 +839,7 @@ osc-knob::after {
 	transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-/* M-Button */
+/* M-Button 
 .controlroom-button-group .toggle-button:has(#controlroom-muteenable) {
 	background-color: var(--mute-color) !important;
 }
@@ -821,7 +850,7 @@ osc-knob::after {
 	color: var(--text-highlight-color);
 }
 
-/* S-Button */
+/* S-Button 
 .controlroom-button-group .toggle-button:has(#main-soloenable) {
 	background-color: var(--solo-color) !important;
 }
@@ -832,7 +861,7 @@ osc-knob::after {
 	color: var(--text-highlight-color);
 }
 
-/* FdrGrp-Button */
+/* FdrGrp-Button 
 .controlroom-button-group .toggle-button:has(#main-adhocfaderenable) {
 	background-color: var(--adhoc-color) !important;
 }
@@ -843,36 +872,136 @@ osc-knob::after {
 	color: var(--text-highlight-color);
 }
 
-/* Slot-Button */
+/* ---Setup Slots--- 
 .controlroom-button-group .toggle-button:has(#setup-slotenable) {
 	background-color: var(--mute-color) !important;
 }
-
 .controlroom-button-group .toggle-button:has(#setup-slotenable:checked) {
 	background-color: var(--mute-highlight-color) !important;
 	box-shadow: 0 0 8px 2px var(--mute-highlight-color-shadow);
 	color: var(--text-highlight-color);
 }
-
-/* Store-Button */
+/* Store-Button 
 .controlroom-button-group .toggle-button:has(#store-button) {
 	background-color: var(--store-color) !important;
 }
-
 .controlroom-button-group .toggle-button:has(#store-button:checked) {
 	background-color: var(--store-highlight-color) !important;
 	box-shadow: 0 0 8px 2px var(--store-highlight-color-shadow);
 	color: var(--text-highlight-color);
 }
-
-
+/* Load-Button 
+.controlroom-button-group .toggle-button:has(#load-button) {
+	background-color: var(--load-color) !important;
+}
+.controlroom-button-group .toggle-button:has(#load-button:checked) {
+	background-color: var(--load-highlight-color) !important;
+	box-shadow: 0 0 8px 2px var(--store-highlight-color-shadow);
+	color: var(--text-highlight-color);
+}
+/* Store/Load-Button Effect 
 .controlroom-button-group .toggle-button:hover {
 	filter: brightness(1.1);
 }
-
 .controlroom-button-group .toggle-button:active {
 	filter: brightness(0.95);
 }
+*/
+
+
+
+.custom-form {
+  border: none; /*3px solid #ddd;      /* Un marc més subtil */
+  border-radius: 8px;          /* Cantons arrodonits */
+  padding: 15px 20px;          /* Espai intern */
+  max-width: 350px;            /* Amplada del formulari */
+  background-color: #f9f9f9;   /* Un fons lleugerament gris */
+  display: flex;
+  flex-direction: column;      /* Apila les files una sota l'altra */
+}
+
+.form-row output {
+    display: flex;
+    padding: 2px;
+	border: 1px solid var(--border-color);
+	border-radius: 2px;
+    min-height: 1.1em;
+    font-size: 1rem;
+    width: 47%;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.form-row select {
+	border: 1px solid var(--border-color);
+	border-radius: 2px;
+	display: inline-block;
+    min-height: 1.1em;
+    width: 50%;
+}
+
+/* Alineació de les files */
+.form-row {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;            
+  margin-bottom: 3px;            
+  width: 100%;
+  cursor: pointer;
+}
+
+/* --- DISSENY DEL SWITCH --- */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;  /* Mida del switch */
+  height: 18px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  padding: 3px;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 24px;
+
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #5555DD;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+/* Estil bàsic per al select perquè combini */
+select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
 
 .led-btn {
 	padding: 8px 12px;
@@ -886,8 +1015,9 @@ osc-knob::after {
 }
 
 .led-btn.active {
-	background-color: orange; 
+	background-color: orange;
 	box-shadow: 0 0 10px rgba(76, 175, 80, 0.7);
 	color: white;
 	border-color: #2E7D32;
 }
+

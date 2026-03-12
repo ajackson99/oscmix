@@ -1,8 +1,12 @@
 
-* {
-	font-family: sans-serif;
+:root {
+	/* Switch widget colors */
+	--switch-off-color: #ccc;
+	--switch-on-color: #5555DD;
+	--switch-thumb-color: white;
 }
-body {
+
+* {
 	display: flex;
 	margin: 0;
 }
