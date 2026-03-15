@@ -278,3 +278,7 @@ The OSC API is not yet final and may change without notice.
 ## Contact
 
 There is an IRC channel #oscmix on irc.libera.chat.
+
+## Thanks
+
+- [@juanramoncastan](https://github.com/juanramoncastan) - UFX II verifications, UI improvements, layout fixes and valuable suggestions ([#5](https://github.com/huddx01/oscmix/issues/5))
