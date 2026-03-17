@@ -69,6 +69,11 @@ int dflag;
 static const struct device *device;
 static struct input *inputs;
 static struct output *outputs;
+/* FX level buffers sized device->inputslen+2 / device->outputslen+2 at init */
+static uint_least32_t *inputpeakfx;
+static uint_least32_t *outputpeakfx;
+static uint_least64_t *inputrmsfx;
+static uint_least64_t *outputrmsfx;
 static struct {
 	int status;
 	int position;
@@ -1676,14 +1681,12 @@ handleregs(uint_least32_t *payload, size_t len)
 static void
 handlelevels(int subid, uint_least32_t *payload, size_t len)
 {
-	static uint_least32_t inputpeakfx[22], outputpeakfx[22];
-	static uint_least64_t inputrmsfx[22], outputrmsfx[22];
 	uint_least32_t peak, *peakfx;
 	uint_least64_t rms, *rmsfx;
 	float peakdb, peakfxdb, rmsdb, rmsfxdb;
 	const char *type;
 	char addr[128];
-	size_t i;
+	size_t i, maxfx;
 
 	if (len % 3 != 0) {
 		fprintf(stderr, "unexpected levels data\n");
@@ -1700,6 +1703,12 @@ handlelevels(int subid, uint_least32_t *payload, size_t len)
 		case 3: peakfx = outputpeakfx, rmsfx = outputrmsfx; break;
 		case 2: type = "playback"; break;
 		default: assert(0);
+	}
+	/* clamp to allocated buffer size to guard against unexpected packet lengths */
+	maxfx = (peakfx == inputpeakfx ? device->inputslen : device->outputslen) + 2;
+	if (len > maxfx) {
+		fprintf(stderr, "levels packet too large: got %zu, expected <= %zu\n", len, maxfx);
+		len = maxfx;
 	}
 	for (i = 0; i < len; ++i) {
 		rms = *payload++;
@@ -1825,7 +1834,11 @@ init(const char *port)
 
 	inputs = calloc(device->inputslen + device->outputslen, sizeof *inputs);
 	outputs = calloc(device->outputslen, sizeof *outputs);
-	if (!inputs || !outputs) {
+	inputpeakfx = calloc(device->inputslen + 2, sizeof *inputpeakfx);
+	outputpeakfx = calloc(device->outputslen + 2, sizeof *outputpeakfx);
+	inputrmsfx = calloc(device->inputslen + 2, sizeof *inputrmsfx);
+	outputrmsfx = calloc(device->outputslen + 2, sizeof *outputrmsfx);
+	if (!inputs || !outputs || !inputpeakfx || !outputpeakfx || !inputrmsfx || !outputrmsfx) {
 		perror(NULL);
 		return -1;
 	}
