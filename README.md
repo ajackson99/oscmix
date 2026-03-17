@@ -231,6 +231,10 @@ GSETTINGS_SCHEMA_DIR=$PWD/gtk ./gtk/oscmix-gtk
 
 <img width="1261" height="874" alt="qt-preview" src="doc/qt-preview.png" />
 
+Latest changes: 
+- Add first-shot implementations of channelstrip details (settings, eq, dyn) 
+- yeah, needs polish regarding colors/positioning/scaling etc...
+
 ### Why Qt?
 
 - **Native experience** - proper window chrome, system fonts, and trackpad scrolling that GTK can't match on Linux and macOS
