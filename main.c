@@ -24,7 +24,18 @@ static volatile sig_atomic_t timeout;
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: oscmix [-dlm] [-r addr] [-s addr]\n");
+	fprintf(stderr, "usage: oscmix [-dlm] [-p port] [-r addr] [-s addr]\n");
+	fprintf(stderr, "  -d        enable debug output\n");
+	fprintf(stderr, "  -l        disable level metering\n");
+	fprintf(stderr, "  -m        send to multicast address (udp!224.0.0.1!8222)\n");
+	fprintf(stderr, "  -p port   MIDI port (default: $MIDIPORT)\n");
+	fprintf(stderr, "  -r addr   OSC receive address (default: udp!127.0.0.1!7222)\n");
+	fprintf(stderr, "  -s addr   OSC send address (default: udp!127.0.0.1!8222)\n");
+	fprintf(stderr, "\nexamples:\n");
+	fprintf(stderr, "  alsarawio 0,0,0 oscmix\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix -r udp!0.0.0.0!7222 -s udp!192.168.1.100!8222\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix -m\n");
 	exit(1);
 }
 
