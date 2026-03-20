@@ -232,8 +232,10 @@ GSETTINGS_SCHEMA_DIR=$PWD/gtk ./gtk/oscmix-gtk
 <img width="1261" height="874" alt="qt-preview" src="doc/qt-preview.png" />
 
 Latest changes: 
-- Lots of fixes/additions 
-- Add oscmix/TotalMix FX 2.1 OSC compatibility
+- Big steps forwards today...
+- Level meters finetuning
+- Editable channel names
+- And a lot under the hood...
 - yeah, needs polish regarding colors/positioning/scaling etc...
 
 ### Why Qt?
