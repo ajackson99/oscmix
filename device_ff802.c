@@ -70,22 +70,21 @@ static enum control regtoctl(int reg, struct param *p) {
 
 	if (reg < 0)
 		return -1;
-	if (reg >= 0x1EE0 && reg <= 0x3BFD) {
+	if (reg >= 0x1EE0 && reg <= 0x3BFF) {
 		int reg_lower = reg & 0xFF;
-		if (reg_lower < 0xE0 || reg_lower > 0xFD) {
-			return -1;
+		if (reg_lower >= 0xE0) {
+			int mix_number = (reg >> 8) & 0x3F;
+			mix_number -= 0x1E;
+			if (mix_number < 0 || mix_number >= 30) {
+				return -1;
+			}
+			p->out = mix_number;
+			p->in = 14 + ((reg & 0x1F) >> 1);
+			if (p->out >= LEN(outputs) || p->in >= LEN(inputs)) {
+				return -1;
+			}
+			return MIX;
 		}
-		int mix_number = (reg >> 8) & 0x3F;
-		mix_number -= 0x1E;
-		if (mix_number < 0 || mix_number >= 30) {
-			return -1;
-		}
-		p->out = mix_number;
-		p->in = reg & 0x1F;
-		if (p->out >= LEN(outputs) || p->in >= LEN(inputs)) {
-			return -1;
-		}
-		return MIX;
 	}
 	if (reg < 0x3C00) {
 		idx = reg >> 8;
@@ -281,16 +280,19 @@ ctltoreg(enum control ctl, const struct param *p)
 			if ((unsigned)p->in >= LEN(inputs)){
 				break;
 			}
-			// Todo: recheck this
 			int base_reg = 0x1EE0 + (p->out * 0x100);
-			int reg_offset = base_reg + p->in;
-			return base_reg | p->out << 8 | p->in;
-		case MIX_LEVEL:
+			return base_reg | p->in;
+		case MIX_LEVEL: {
 			if ((unsigned)p->out >= LEN(outputs)) break;
 			if ((unsigned)p->in >= LEN(inputs) + LEN(outputs)) break;
-			idx = p->in;
-			if (idx >= LEN(inputs)) idx += 0x20 - LEN(inputs);
-			return 0x4000 | p->out << 6 | idx;
+			unsigned base = 0x4000 + (unsigned)p->out * 0x40;
+			if ((unsigned)p->in < LEN(inputs)) {
+				return base + (unsigned)p->in;
+			} else {
+				unsigned pb_idx = (unsigned)p->in - LEN(inputs);
+				return base + 0x20 + pb_idx;
+			}
+		}
 		case REVERB:                  return 0x3C00;
 		case REVERB_TYPE:             return 0x3C01;
 		case REVERB_PREDELAY:         return 0x3C02;

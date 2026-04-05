@@ -22,10 +22,22 @@ static int rfd, wfd;
 static volatile sig_atomic_t timeout;
 
 static void
-usage(void)
+usage(int status)
 {
-	fprintf(stderr, "usage: oscmix [-dlm] [-r addr] [-s addr]\n");
-	exit(1);
+	fprintf(stderr, "usage: oscmix [-dhlm] [-p port] [-r addr] [-s addr]\n");
+	fprintf(stderr, "  -d        enable debug output\n");
+	fprintf(stderr, "  -h        show this help\n");
+	fprintf(stderr, "  -l        disable level metering\n");
+	fprintf(stderr, "  -m        send to multicast address (udp!224.0.0.1!8222)\n");
+	fprintf(stderr, "  -p port   MIDI port (default: $MIDIPORT)\n");
+	fprintf(stderr, "  -r addr   OSC receive address (default: udp!127.0.0.1!7222)\n");
+	fprintf(stderr, "  -s addr   OSC send address (default: udp!127.0.0.1!8222)\n");
+	fprintf(stderr, "\nexamples:\n");
+	fprintf(stderr, "  alsarawio 0,0,0 oscmix\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix -r udp!0.0.0.0!7222 -s udp!192.168.1.100!8222\n");
+	fprintf(stderr, "  alsaseqio 16:0 oscmix -m\n");
+	exit(status);
 }
 
 static void
@@ -128,11 +140,6 @@ main(int argc, char *argv[])
 	struct pollfd pfd[2];
 	const char *port;
 
-	if (fcntl(6, F_GETFD) < 0)
-		fatal("fcntl 6:");
-	if (fcntl(7, F_GETFD) < 0)
-		fatal("fcntl 7:");
-
 	recvaddr = defrecvaddr;
 	sendaddr = defsendaddr;
 	port = NULL;
@@ -141,25 +148,33 @@ main(int argc, char *argv[])
 	case 'd':
 		dflag = 1;
 		break;
+	case 'h':
+		usage(0);
+		break;
 	case 'l':
 		lflag = 1;
 		break;
 	case 'r':
-		recvaddr = EARGF(usage());
+		recvaddr = EARGF(usage(1));
 		break;
 	case 's':
-		sendaddr = EARGF(usage());
+		sendaddr = EARGF(usage(1));
 		break;
 	case 'm':
 		sendaddr = mcastaddr;
 		break;
 	case 'p':
-		port = EARGF(usage());
+		port = EARGF(usage(1));
 		break;
 	default:
-		usage();
+		usage(1);
 		break;
 	} ARGEND
+
+	if (fcntl(6, F_GETFD) < 0)
+		fatal("fcntl 6:");
+	if (fcntl(7, F_GETFD) < 0)
+		fatal("fcntl 7:");
 
 	rfd = sockopen(recvaddr, 1);
 	wfd = sockopen(sendaddr, 0);

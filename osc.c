@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 700
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include "osc.h" 
 #include "intpack.h"
 
@@ -41,7 +42,10 @@ oscgetint(struct oscmsg *msg)
 		msg->err = "not enough arguments";
 		return 0;
 	default:
-		msg->err = "incorrect argument type";
+		snprintf(msg->errbuf, sizeof(msg->errbuf), 
+		         "incorrect argument type: expected 'i', 'T', or 'F', got '%c'", 
+		         *msg->type);
+		msg->err = msg->errbuf;
 		return 0;
 	}
 	if (msg->type)
@@ -73,7 +77,10 @@ oscgetstr(struct oscmsg *msg)
 		msg->err = "not enough arguments";
 		return NULL;
 	default:
-		msg->err = "incorrect argument type";
+		snprintf(msg->errbuf, sizeof(msg->errbuf), 
+		         "incorrect argument type: expected 's' or 'N', got '%c'", 
+		         *msg->type);
+		msg->err = msg->errbuf;
 		return NULL;
 	}
 	if (msg->type)
@@ -108,7 +115,10 @@ oscgetfloat(struct oscmsg *msg)
 		msg->err = "not enough arguments";
 		return 0;
 	default:
-		msg->err = "incorrect argument type";
+		snprintf(msg->errbuf, sizeof(msg->errbuf), 
+		         "incorrect argument type: expected 'i' or 'f', got '%c'", 
+		         *msg->type);
+		msg->err = msg->errbuf;
 		return 0;
 	}
 	++msg->type;

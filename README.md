@@ -1,12 +1,12 @@
 [![Build and Release](https://github.com/huddx01/oscmix/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/huddx01/oscmix/actions/workflows/build.yml)
 
-⚠️ Note
+Hi, you have reached my dev branch which is a fork of https://github.com/michaelforney/oscmix.
 
-You have reached my dev branch which is a fork of https://github.com/michaelforney/oscmix.
+> [!NOTE]
+> My branch is NOT sponsored, authorized, endorsed, or associated with RME Audio in any way. This is an independent implementation created for educational purposes and to provide Linux (and macOS) support for the RME hardware.
 
-Keep in mind that this content may be untested/experimental/wip state.
-
-
+> [!WARNING]
+> Keep in mind that this content may be untested/experimental/wip state.
 # oscmix
  
 oscmix implements an OSC API for some RME's Fireface units running in
@@ -64,7 +64,7 @@ cd oscmix
 git switch dev
 ```
 - 2b) Or, if you want use 
-[michaelforney](https://github.com/michaelforney)’s original repo: 
+[michaelforney](https://github.com/michaelforney)'s original repo: 
 ```shell
 git clone https://github.com/michaelfourney/oscmix.git
 cd oscmix
@@ -203,7 +203,9 @@ For example, if your unit would appear like this...
 ```sh
 ./coremidiio -f 6,7 -p 4 ./oscmix -p 'Fireface 802 (12345678) Port 2'
 ```
-Note: you can also set MIDIPORT env variable to 'Fireface 802 (12345678) Port 2' in this example.
+
+> [!NOTE]
+> You can also set MIDIPORT env variable to 'Fireface 802 (12345678) Port 2' in this example.
 
 
 ## GTK UI
@@ -220,6 +222,31 @@ environment variable.
 ```sh
 GSETTINGS_SCHEMA_DIR=$PWD/gtk ./gtk/oscmix-gtk
 ```
+
+## Qt UI *(Early WIP)*
+
+> [!NOTE]
+> This is a first rough draft after only a few days of learning Qt - expect rough edges.
+> Sources will follow once it's in a shareable state.
+> 
+> NEW: A pre-built binary (for first try-out) is available in the [Releases](https://github.com/huddx01/oscmix/releases)
+> 
+> For a current feature description see the [oscmix Qt UI wiki page](https://github.com/huddx01/oscmix/wiki/oscmixQt)
+
+<img width="1261" height="874" alt="qt-preview" src="doc/qt-preview.png" />
+
+### Why Qt?
+
+- **Native experience** - proper window chrome, system fonts, and trackpad scrolling that GTK can't match on Linux and macOS
+- **Universal Code** - no change of one single code line needed for building on each system (Linux/macOS/Windows). While the UI exacly looks the same on all. 
+- **Open GL/Metal** - Qt supports direct graphics engine support for all systems, without further hassles...
+
+### Your input wanted
+
+This frontend is at the stage where your feedback shapes the direction. Two things are especially useful right now:
+
+1. **What matters to you in the UI?** Missing controls, layout preferences, workflow details - just open an issue.
+2. **GTK vs. Qt priority?** Development time is finite. If you actively use or plan to use the Qt frontend, let me know via issue - it directly influences where time goes.
 
 ## Web UI
 
@@ -255,26 +282,10 @@ and `wasi-libc`.
 
 ## OSC API
 
-The OSC API is not yet final and may change without notice.
+For current state of full OSC API reference, see the [oscmix OSC API](https://github.com/huddx01/oscmix/wiki/oscmix-OSC-API) wiki page.
 
-| Method | Arguments | Description |
-| --- | --- | --- |
-| `/input/{1..20}/mute` | `i` enabled | Input *n* muted |
-| `/input/{1..20}/fxsend` | `f` db (-65-0) | Input *n* FX send level |
-| `/input/{1..20}/stereo` | `i` enabled | Input *n* is stereo |
-| `/input/{1..20}/record` | `i` enabled | Input *n* record enabled |
-| `/input/{1..20}/playchan` | `i` 0=off 1-60 | Input *n* play channel |
-| `/input/{1..20}/msproc` | `i` enabled | Input *n* M/S processing enabled |
-| `/input/{1..20}/phase` | `i` enabled | Input *n* phase invert enabled |
-| `/input/{1..4}/gain` | `f` 0-75 (n=1,2) 0-24 (n=3,4) | Input *n* gain |
-| `/input/{1..2}/48v` | `i` enabled | Input *n* phantom power enabled |
-| `/input/{3..8}/reflevel` | `i` 0=+4dBu 1=+13dBu 2=+19dBu | Input *n* reference level |
-| `/durec/status` | `i` | DURec status |
-| `/refresh` | none | **W** Refresh device registers |
-| `/register` | `ii...` register, value | **W** Set device register explicitly |
+## Thanks
 
-**TODO** Document rest of API. For now, see the OSC tree in `oscmix.c`.
+- [@juanramoncastan](https://github.com/juanramoncastan) - UFX II verifications, UI improvements, layout fixes and valuable suggestions ([#5](https://github.com/huddx01/oscmix/issues/5))
 
-## Contact
-
-There is an IRC channel #oscmix on irc.libera.chat.
+- [@Sojuzstudio](https://github.com/Sojuzstudio) - Special thanks - for lots of tipps, ideas, testing with own hw on linux, and very useful feedback regarding oscmixQt UI and much more!

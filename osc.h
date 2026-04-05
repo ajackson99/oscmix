@@ -8,6 +8,7 @@ struct oscmsg {
 	unsigned char *buf, *end;
 	const char *type;
 	const char *err;
+	char errbuf[128];  /* buffer for detailed error messages */
 };
 
 int oscend(struct oscmsg *msg);
