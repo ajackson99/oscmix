@@ -1,9 +1,9 @@
-.Dd March 5, 2026
+.Dd April 6, 2026
 .Dt ALSARAWIO 1
 .Os
 .Sh NAME
 .Nm alsarawio
-.Nd ALSA raw MIDI I/O
+.Nd ALSA raw MIDI I/O bridge
 .Sh SYNOPSIS
 .Nm
 .Ar device
@@ -40,6 +40,19 @@ using subdevice 3 of card 0:
 Short form equivalent:
 .Pp
 .Dl alsarawio 0,0,3 oscmix
+.Pp
+Start
+.Xr oscmix 1
+with multicast output and mDNS registration:
+.Pp
+.Dl alsarawio 0,0,3 oscmix -m -z
+.Sh AVAILABILITY
+.Nm
+is only available on
+.Tn Linux .
+On macOS, use
+.Xr coremidiio 1
+instead.
 .Sh SEE ALSO
 .Xr alsaseqio 1 ,
 .Xr oscmix 1 ,

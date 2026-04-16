@@ -1,9 +1,9 @@
-.Dd March 21, 2025
+.Dd April 6, 2026
 .Dt ALSASEQIO 1
 .Os
 .Sh NAME
 .Nm alsaseqio
-.Nd ALSA sequencer I/O
+.Nd ALSA sequencer I/O bridge
 .Sh SYNOPSIS
 .Nm
 .Op Fl rws
@@ -116,9 +116,22 @@ using port 3 of a Fireface UFX III:
 .Pp
 .Dl alsaseqio -p 'Fireface UFX III:3' -f 6,7 oscmix
 .Pp
+Start
+.Xr oscmix 1
+with multicast output and mDNS registration:
+.Pp
+.Dl alsaseqio 16:0 oscmix -m -z
+.Pp
 Bridge an ALSA sequencer port to a CoreMIDI port on a networked Mac:
 .Pp
 .Dl alsaseqio ssh mymac coremidiio
+.Sh AVAILABILITY
+.Nm
+is only available on
+.Tn Linux .
+On macOS, use
+.Xr coremidiio 1
+instead.
 .Sh SEE ALSO
 .Xr alsarawio 1 ,
 .Xr coremidiio 1 ,

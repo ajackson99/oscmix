@@ -5,6 +5,11 @@
 
 #define LEN(a) (sizeof(a) / sizeof(*(a)))
 
+/* MIX_LEVEL register layout (output-major, 0x40 stride per output):
+ *   input channels  : 0x4000 + out*0x40 + in
+ *   playback channels: 0x4000 + out*0x40 + 0x20 + pb_idx
+ */
+
 static const char *const reflevel_input[] = {"+4dBu", "Lo Gain"};
 static const char *const reflevel_output[] = {"-10dBV", "+4dBu", "Hi Gain"};
 
@@ -70,22 +75,6 @@ static enum control regtoctl(int reg, struct param *p) {
 
 	if (reg < 0)
 		return -1;
-	if (reg >= 0x1EE0 && reg <= 0x3BFF) {
-		int reg_lower = reg & 0xFF;
-		if (reg_lower >= 0xE0) {
-			int mix_number = (reg >> 8) & 0x3F;
-			mix_number -= 0x1E;
-			if (mix_number < 0 || mix_number >= 30) {
-				return -1;
-			}
-			p->out = mix_number;
-			p->in = 14 + ((reg & 0x1F) >> 1);
-			if (p->out >= LEN(outputs) || p->in >= LEN(inputs)) {
-				return -1;
-			}
-			return MIX;
-		}
-	}
 	if (reg < 0x3C00) {
 		idx = reg >> 8;
 		reg &= 0xFF; 
@@ -98,6 +87,13 @@ static enum control regtoctl(int reg, struct param *p) {
 				return -1;
 			p->out = idx;
 			flags = outputs[idx].flags;
+			// TODO: We need the return MIX somehow. This seems to break correct input mapping - so commented for now
+//			if (reg >= 0xE0) {
+//				p->in = reg - 0xE0;
+//				if ((unsigned)p->in >= LEN(inputs))
+//					return -1;
+//				return MIX;
+//			}
 			if (reg < 0x20) {
 				reg |= 0x1E00;
 			}
@@ -167,7 +163,7 @@ static enum control regtoctl(int reg, struct param *p) {
 		case 0x3C0B: return REVERB_SMOOTH;
 		case 0x3C0C: return REVERB_VOLUME;
 		case 0x3C0D: return REVERB_WIDTH;
-		
+
 		case 0x3C20: return ECHO;
 		case 0x3C21: return ECHO_TYPE;
 		case 0x3C22: return ECHO_DELAY;
@@ -200,7 +196,7 @@ static enum control regtoctl(int reg, struct param *p) {
 
 		case 0x3F9E: return SETUP_ARCLEDS;
 
-		default:   return UNKNOWN;
+		default:     return UNKNOWN;
 	}
 	return -1;
 }
@@ -271,7 +267,7 @@ ctltoreg(enum control ctl, const struct param *p)
 		case AUTOLEVEL_MAXGAIN:       reg = 0x81; goto channel;
 		case AUTOLEVEL_HEADROOM:      reg = 0x82; goto channel;
 		case AUTOLEVEL_RISETIME:      reg = 0x83; goto channel;
-		channel:                      if (idx == -1) break;
+			channel:                      if (idx == -1) break;
 			return idx << 8 | reg;
 		case MIX:
 			if ((unsigned)p->out >= LEN(outputs)) {
@@ -280,6 +276,9 @@ ctltoreg(enum control ctl, const struct param *p)
 			if ((unsigned)p->in >= LEN(inputs)){
 				break;
 			}
+			/* Write address: sequential per-output layout, stride 0x100.
+			 * p->in is in [0..29] and the base_reg low byte is 0xE0,
+			 * so OR and ADD are equivalent (no bit overlap). */
 			int base_reg = 0x1EE0 + (p->out * 0x100);
 			return base_reg | p->in;
 		case MIX_LEVEL: {
@@ -359,4 +358,3 @@ const struct device ff802 = {
 	.regtoctl = regtoctl,
 	.ctltoreg = ctltoreg,
 };
-

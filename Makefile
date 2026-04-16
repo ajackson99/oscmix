@@ -22,6 +22,25 @@ ALSA_LDLIBS?=$$(pkg-config --libs-only-l alsa)
 COREMIDI?=$(OS-Darwin)
 COREMIDI_LDLIBS?=-framework CoreMIDI -framework CoreFoundation
 
+# mDNS/DNS-SD: Avahi on Linux, Bonjour (built-in) on macOS
+AVAHI?=$(OS-Linux)
+AVAHI_CFLAGS?=$$(pkg-config --cflags avahi-client)
+AVAHI_LDFLAGS?=$$(pkg-config --libs-only-L --libs-only-other avahi-client)
+AVAHI_LDLIBS?=$$(pkg-config --libs-only-l avahi-client) -lpthread
+
+BONJOUR?=$(OS-Darwin)
+BONJOUR_LDLIBS?=-lpthread
+
+USBSCAN_OBJ-$(OS-Linux)= usbscan.o
+
+MDNS_OBJ-$(AVAHI)=   mdns_avahi.o
+MDNS_OBJ-$(BONJOUR)= mdns_bonjour.o
+MDNS_CFLAGS-$(AVAHI)=   $(AVAHI_CFLAGS) -DHAVE_MDNS
+MDNS_CFLAGS-$(BONJOUR)= -DHAVE_MDNS
+MDNS_LDFLAGS-$(AVAHI)=  $(AVAHI_LDFLAGS)
+MDNS_LDLIBS-$(AVAHI)=   $(AVAHI_LDLIBS)
+MDNS_LDLIBS-$(BONJOUR)= $(BONJOUR_LDLIBS)
+
 REGTOOL_GENERIC_LIBS-$(OS-Linux)=$(ALSA_LDFLAGS) $(ALSA_LDLIBS)
 REGTOOL_GENERIC_LIBS-$(OS-Darwin)=fatal.o $(COREMIDI_LDLIBS)
 
@@ -67,6 +86,8 @@ OSCMIX_OBJ=\
 	socket.o\
 	sysex.o\
 	util.o\
+	$(USBSCAN_OBJ-y)\
+	$(MDNS_OBJ-y)\
 	$(DEVICES)
 
 WSDGRAM_OBJ=\
@@ -89,8 +110,17 @@ REGTOOL_GENERIC_OBJ-$(OS-Linux)=
 
 oscmix.o $(DEVICES): device.h
 
+main.o: main.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(MDNS_CFLAGS-y) -c -o $@ main.c
+
+mdns_avahi.o: mdns_avahi.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(AVAHI_CFLAGS) -c -o $@ mdns_avahi.c
+
+mdns_bonjour.o: mdns_bonjour.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ mdns_bonjour.c
+
 oscmix: $(OSCMIX_OBJ)
-	$(CC) $(LDFLAGS) -o $@ $(OSCMIX_OBJ) -l m
+	$(CC) $(LDFLAGS) $(MDNS_LDFLAGS-y) -o $@ $(OSCMIX_OBJ) -lm $(MDNS_LDLIBS-y)
 
 wsdgram: $(WSDGRAM_OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(WSDGRAM_OBJ) -l pthread
@@ -143,6 +173,9 @@ install: $(BIN)
 	cp $(BIN) $(DESTDIR)$(BINDIR)/
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
 	cp doc/oscmix.1 $(DESTDIR)$(MANDIR)/man1/
+	cp doc/alsarawio.1 $(DESTDIR)$(MANDIR)/man1/
+	cp doc/alsaseqio.1 $(DESTDIR)$(MANDIR)/man1/
+	cp doc/coremidiio.1 $(DESTDIR)$(MANDIR)/man1/
 
 .PHONY: clean
 clean:

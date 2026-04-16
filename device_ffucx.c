@@ -78,7 +78,6 @@ regtoctl(int reg, struct param *p)
 
 	if (reg < 0)
 		return -1;
-
 	/* Input channels (0x0000-0x11FF) */
 	if (reg < 0x1200) {
 		idx = reg >> 8;
@@ -96,23 +95,20 @@ regtoctl(int reg, struct param *p)
 		if (idx >= LEN(outputs))
 			return -1;
 		p->out = idx;
+
+		// TODO: We need the return MIX somehow. This might break correct input mapping - so comment the if-expression out if it doesnt work:
+		if (reg >= 0xE0) {
+			p->in = reg - 0xE0;
+			if ((unsigned)p->in >= LEN(inputs))
+				return -1;
+			return MIX;
+		}
+
+
 		p->in = -1;
 		flags = outputs[idx].flags;
 		reg += 0x1200;
 	}
-
-	// TODO: Find out the Mix Regs which will map to MIX enum
-	// Compared to FF802 (which has a 0x0100 offset for channels, too):
-	// These might be:
-	// 0x12E0 for AN 1 → AN 1 volume
-	// 0x12E1 for AN 2 → AN 1 volume
-	// 0x12E2 for AN 3 → AN 1 volume
-	// etc...
-	// 0x13E0 for AN 1 → AN 2 volume
-	// 0x13E1 for AN 2 → AN 2 volume
-	// 0x13E2 for AN 3 → AN 2 volume
-	// etc...
-	// after that, we should implement the logic and return MIX here;
 
 	else {
 		p->in = -1;
@@ -190,7 +186,7 @@ regtoctl(int reg, struct param *p)
 		case 0x3C25: return ECHO_VOLUME;
 		case 0x3C26: return ECHO_WIDTH;
 
-		// looks similar to FF802...
+
 		case 0x3D20: return CLOCK_SOURCE;
 		case 0x3D21: return CLOCK_SAMPLERATE;
 		case 0x3D22: return CLOCK_WCKSINGLE;
@@ -198,19 +194,14 @@ regtoctl(int reg, struct param *p)
 		case 0x3D41: return HARDWARE_OPTICALOUT;
 		case 0x3D42: return HARDWARE_SPDIFOUT;
 
-    // REFRESH seems not needed in regtoctl anymore (at least for UCXII, 802, UFXIII)
-    // see: https://github.com/michaelforney/oscmix/commit/8be1121371bcba3d4bdcb48d57d6fa651a75dd1c
-		// case 0x3F99: return REFRESH;
-
-		// TODO: Verify these (just a guess from FF802):
 		case 0x3D43: return HARDWARE_STANDALONEMIDI;
 		case 0x3D44: return HARDWARE_CCMODE;
-		// TODO: Verify these (these regs are quite important)
+
 		case 0x3F00: return HARDWARE_DSPVERLOAD;
 		case 0x3F01: return HARDWARE_DSPSTATUS;
 		case 0x3F02: return HARDWARE_DSPAVAIL;
-    default:   	 return UNKNOWN;
 
+		default:     return UNKNOWN;
 	}
 	return -1;
 }
@@ -282,9 +273,16 @@ ctltoreg(enum control ctl, const struct param *p)
 		case AUTOLEVEL_MAXGAIN:       reg = 0x81; goto channel;
 		case AUTOLEVEL_HEADROOM:      reg = 0x82; goto channel;
 		case AUTOLEVEL_RISETIME:      reg = 0x83; goto channel;
+			channel:
+				if (idx == -1) break;
+				if (idx < LEN(inputs))
+					return (idx << 8) + reg;
+				return 0x1200 + ((idx - LEN(inputs)) << 8) + reg;
 
-			// TODO implement MIX logic
-			//case MIX:
+		case MIX:
+			if ((unsigned)p->out >= LEN(outputs)) break;
+			if ((unsigned)p->in >= LEN(inputs)) break;
+			return 0x12E0 + p->out * 0x100 + p->in;
 		case MIX_LEVEL:
 			if ((unsigned)p->out >= LEN(outputs)) break;
 			if ((unsigned)p->in >= LEN(inputs) + LEN(outputs)) break;
@@ -315,17 +313,17 @@ ctltoreg(enum control ctl, const struct param *p)
 		case ECHO_VOLUME:             return 0x3C25;
 		case ECHO_WIDTH:              return 0x3C26;
 
-		// looks similar to FF802...
+
 		case CLOCK_SOURCE:            return 0x3D20;
 		case CLOCK_SAMPLERATE:        return 0x3D21;
 		case CLOCK_WCKSINGLE:         return 0x3D22;
 		case CLOCK_WCKTERM:           return 0x3D40;
 		case HARDWARE_OPTICALOUT:     return 0x3D41;
 		case HARDWARE_SPDIFOUT:       return 0x3D42;
-		// TODO: Verify these:
+
 		case HARDWARE_STANDALONEMIDI: return 0x3D43;
 		case HARDWARE_CCMODE:         return 0x3D44;
-		// TODO: Verify these (these 3 regs are quite important)
+
 		case HARDWARE_DSPVERLOAD:     return 0x3F00;
 		case HARDWARE_DSPSTATUS:      return 0x3F01;
 		case HARDWARE_DSPAVAIL:       return 0x3F02;
@@ -334,14 +332,6 @@ ctltoreg(enum control ctl, const struct param *p)
 		default:                      break;
 	}
 	return -1;
-
-// TODO: although it seems to work on UCX we should move this into switch-case above it seems to be less efficient in this place
-channel:
-	if (idx == -1) return -1;
-	if (idx < LEN(inputs))
-		return (idx << 8) + reg;
-	else
-		return 0x1200 + ((idx - LEN(inputs)) << 8) + reg;
 }
 
 const struct device ffucx = {

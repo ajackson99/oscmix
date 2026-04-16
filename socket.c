@@ -10,6 +10,15 @@
 #include "socket.h"
 #include "util.h"
 
+uint16_t
+sockaddrport(const char *addr)
+{
+	const char *p = strrchr(addr, '!');
+	if (p && *(p + 1) != '\0')
+		return (uint16_t)atoi(p + 1);
+	return 0;
+}
+
 int
 sockopen(char *addr, int passive)
 {

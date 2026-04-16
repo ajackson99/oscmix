@@ -49,10 +49,14 @@ If you prefer building your own from the sources, follow the steps below...
 #### For Debian/Ubuntu:
 ```shell
 sudo apt update
-sudo apt install -y libasound2-dev pkg-config libgtk-3-dev libglib2.0-dev clang lld git
+sudo apt install -y libasound2-dev pkg-config libgtk-3-dev libglib2.0-dev libavahi-client-dev clang lld git
 ```
 #### For Darwin(macOS):
-**TODO** Document the dependencies for macOS here.
+Xcode Command Line Tools or Xcode are required. Bonjour (mDNS) is built into macOS.
+
+```sh
+xcode-select --install
+```
 
 ### 2. Download Repository
 First, decide which repo/branch fits your needs/unit.
@@ -85,18 +89,54 @@ See: https://github.com/huddx01/oscmix/tree/dev?tab=readme-ov-file#web-ui
 ## General Oscmix Usage
 
 ```
-oscmix [-dl] [-r recvaddr] [-s sendaddr]
+oscmix [-dhlz] [-m [port]] [-p midiport] [-r recvaddr] [-s sendaddr]
 ```
 
 oscmix reads and writes MIDI SysEx messages from/to file descriptors
-6 and 7 respectively, which are expected to be opened.
+6 and 7 respectively, which are expected to be opened by `alsarawio`,
+`alsaseqio` (Linux) or `coremidiio` (macOS).
 
 By default, oscmix will listen for OSC messages on `udp!127.0.0.1!7222`
 and send to `udp!127.0.0.1!8222`.
 
-See the manual, [oscmix.1], for more information.
+| Flag | Description |
+|------|-------------|
+| `-d` | Enable debug output |
+| `-h` | Show help and exit |
+| `-l` | Disable level metering |
+| `-m [port]` | Send OSC updates to multicast address `224.0.0.1` on given port (default: `8222`) |
+| `-p midiport` | MIDI port name (default: `$MIDIPORT` env var) |
+| `-r addr` | OSC receive address (default: `udp!127.0.0.1!7222`) |
+| `-s addr` | OSC send address (default: `udp!127.0.0.1!8222`) |
+| `-z` | Zeroconf - Register OSC service via mDNS/DNS-SD (`_osc._udp`) for automatic service discovery |
 
-[oscmix.1]: https://michaelforney.github.io/oscmix/oscmix.1.html
+See the manual pages for more information: `man oscmix`, `man alsaseqio`, `man alsarawio`, `man coremidiio`.
+
+### mDNS / DNS-SD Discovery
+
+When started with `-z`, oscmix registers itself as an `_osc._udp` service on the local network.
+On Linux this uses [Avahi](https://avahi.org); on macOS Bonjour is used (no extra dependencies).
+
+mDNS / DNS-SD Discovery Implementation is based and according the [OSC v.1.1 spec](https://ccrma.stanford.edu/groups/osc/spec-1_1.html).
+For details see [NIME 2009 paper](https://ccrma.stanford.edu/groups/osc/files/2009-NIME-OSC-1.1.pdf).
+
+The registered service includes device metadata (name, serial, channel count, ports) so that
+compatible clients — including the oscmix Qt UI — can discover and connect automatically
+without manual IP/port configuration.
+
+```sh
+# Start with multicast output and mDNS registration
+alsaseqio 16:3 oscmix -m -z
+
+# Use a custom multicast port
+alsaseqio 16:3 oscmix -m 8233 -z
+
+# Verify registration on Linux
+avahi-browse _osc._udp
+
+# Verify registration on macOS
+dns-sd -B _osc._udp local
+```
 
 ## Running
 
@@ -155,6 +195,11 @@ We use the client and last port from the result above to run oscmix:
 alsaseqio 16:3 oscmix
 ```
 
+With multicast output and mDNS registration:
+```sh
+alsaseqio 16:3 oscmix -m -z
+```
+
 ### BSD
 
 On BSD systems, you can launch oscmix with file descriptors 6 and
@@ -178,16 +223,10 @@ You can install the Xcode Command Line Tools via:
 xcode-select --install
 ```
 
-Afterwards, go to the cloned oscmix directory (assure you are on dev branch) and buid oscmix via:
+Afterwards, go to the cloned oscmix directory (assure you are on dev branch) and build oscmix and coremidiio via:
 
 ```sh
-make oscmix
-```
-
-Additionally you need to build coremidiio via: 
-
-```sh
-make coremidiio
+make oscmix coremidiio
 ```
 
 If this is done, check your port number and remember the exact name of your unit:
@@ -206,6 +245,12 @@ For example, if your unit would appear like this...
 
 > [!NOTE]
 > You can also set MIDIPORT env variable to 'Fireface 802 (12345678) Port 2' in this example.
+
+With multicast output and mDNS registration:
+
+```sh
+./coremidiio -f 6,7 -p 4 ./oscmix -m -z
+```
 
 
 ## GTK UI

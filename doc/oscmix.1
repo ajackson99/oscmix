@@ -1,4 +1,4 @@
-.Dd March 5, 2026
+.Dd April 6, 2026
 .Dt OSCMIX 1
 .Os
 .Sh NAME
@@ -6,7 +6,9 @@
 .Nd RME Fireface mixer OSC bridge
 .Sh SYNOPSIS
 .Nm
-.Op Fl dl
+.Op Fl dhlz
+.Op Fl m Op Ar port
+.Op Fl p Ar midiport
 .Op Fl r Ar recvaddr
 .Op Fl s Ar sendaddr
 .Sh DESCRIPTION
@@ -26,23 +28,49 @@ On macOS, use
 .Bl -tag -width Ds
 .It Fl d
 Enable debug messages.
+.It Fl h
+Show help and exit.
 .It Fl l
 Disable level meters.
-.It Fl r Ar recvaddr
-The address on which to listen for OSC messages.
-By default,
+.It Fl m Op Ar port
+Send OSC updates to the multicast address
+.Cm 224.0.0.1
+on the given
+.Ar port
+(default:
+.Cm 8222 ) .
+Shorthand for
+.Fl s Cm udp!224.0.0.1! Ns Ar port .
+Multiple clients can receive updates simultaneously by joining the
+multicast group.
+.It Fl p Ar midiport
+The MIDI port name to connect to.
+If not specified,
 .Nm
-listens on
+uses the value of the
+.Ev MIDIPORT
+environment variable (set automatically by
+.Xr alsarawio 1
+and
+.Xr alsaseqio 1 ) .
+.It Fl r Ar recvaddr
+The address on which to listen for incoming OSC messages from clients.
+Defaults to
 .Cm udp!127.0.0.1!7222 .
 .It Fl s Ar sendaddr
-The address on which to send OSC messages.
-By default,
+The address to which
 .Nm
-sends to
+sends OSC updates.
+Defaults to
 .Cm udp!127.0.0.1!8222 .
-.It Fl m
-Shorthand for
-.Fl s Cm udp!224.0.0.1!8222 .
+Use a multicast address (224.0.0.0/4) to broadcast to multiple clients.
+.It Fl z
+Register the OSC service via mDNS/DNS-SD as
+.Cm _osc._udp
+so that clients on the local network can discover it automatically.
+On Linux this requires Avahi; on macOS Bonjour is used.
+The TXT record contains device metadata (id, uid, flags, inputs, outputs,
+recvport, sendport, mcast).
 .El
 .Sh ADDRESS FORMAT
 Addresses are specified using the syntax
@@ -54,6 +82,44 @@ Currently, the only supported protocol is
 Alternatively, you can specify a file descriptor number instead.
 Note that OSC relies on write boundaries being preserved, so this
 file descriptor should refer to some open message-oriented socket.
+.Sh MDNS / DNS-SD
+When started with
+.Fl z ,
+.Nm
+registers itself as an
+.Cm _osc._udp
+service via mDNS.
+The service instance name has the form
+.Qq oscmix @ Ar uid
+where
+.Ar uid
+is the device UID including serial number (e.g.\&
+.Qq Fireface 802 (12345678) ) .
+.Pp
+The following TXT record keys are published:
+.Bl -tag -width recvport
+.It id
+Short device identifier (e.g.\&
+.Cm ff802 ) .
+.It uid
+Full device UID with serial number.
+.It flags
+Device capability bitmask (DEVICE_HAS_DUREC=1, DEVICE_HAS_ROOMEQ=2).
+.It inputs
+Number of input channels.
+.It outputs
+Number of output channels.
+.It recvport
+UDP port clients should send OSC commands to.
+.It sendport
+UDP port
+.Nm
+sends updates from.
+.It mcast
+1 if
+.Nm
+is sending to a multicast address, 0 otherwise.
+.El
 .Sh SUPPORTED DEVICES
 The following RME Fireface devices are supported when running in
 class-compliant mode:
@@ -71,22 +137,47 @@ RME Fireface UFX II
 .It
 RME Fireface UFX III
 .El
+.Sh ENVIRONMENT
+.Bl -tag -width MIDIPORT
+.It Ev MIDIPORT
+MIDI port name to connect to.
+Set automatically by
+.Xr alsarawio 1
+and
+.Xr alsaseqio 1 .
+Overridden by
+.Fl p .
+.El
 .Sh EXAMPLES
 Start
 .Nm
-using alsaseqio with port 3 of a Fireface UFX III:
+on Linux using alsaseqio with a Fireface UFX III:
 .Pp
-.Dl alsaseqio -p 'Fireface UFX III:3' -f 6,7 oscmix
+.Dl alsaseqio 16:0 oscmix
 .Pp
 Start
 .Nm
-using alsarawio with raw MIDI device hw:0,0,3:
+on Linux using alsarawio:
 .Pp
-.Dl alsarawio hw:0,0,3 oscmix
+.Dl alsarawio 0,0,3 oscmix
 .Pp
-On BSD, open the device directly:
+Start with multicast output on a custom port and mDNS registration:
 .Pp
-.Dl oscmix 6<>/dev/rmidi1 7>&6
+.Dl alsaseqio 16:0 oscmix -m 8233 -z
+.Pp
+Start
+.Nm
+on macOS using coremidiio:
+.Pp
+.Dl coremidiio -f 6,7 -p 2 oscmix
+.Pp
+Start on macOS with multicast and mDNS:
+.Pp
+.Dl coremidiio -f 6,7 -p 2 oscmix -m -z
+.Pp
+Accept OSC from any interface and send to a specific remote host:
+.Pp
+.Dl alsaseqio 16:0 oscmix -r udp!0.0.0.0!7222 -s udp!192.168.1.100!8222
 .Sh SEE ALSO
 .Xr alsarawio 1 ,
 .Xr alsaseqio 1 ,
